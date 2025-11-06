@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>1-A 최대 인원 입력</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="superbar">
+    <div class="container superbar-inner">배치 설정 도구</div>
+  </div>
+  <header class="topbar">
+    <div class="topbar-inner container">
+      <div class="brand">국립강릉원주대학교 간호학과(실습 배치 페이지)</div>
+    </div>
+  </header>
+
+  <div class="page-hero">
+    <div class="container">
+      <div class="breadcrumbs">
+        <a href="index.html">배치 입력</a>
+        <span class="sep">&gt;</span>
+        <span>1-A 최대 인원</span>
+      </div>
+      <h1 class="page-title">1-A 최대 인원 입력</h1>
+    </div>
+  </div>
+
+  <main class="container page-content">
+    <div class="panel">
+      <div class="panel-header">
+        <h2 class="panel-title">과목/병원별 기간별 최대 인원</h2>
+        <div class="header-actions" style="display:flex; gap:8px; align-items:center;">
+          <label for="semester-toggle" class="muted" style="margin-right:4px;">학기</label>
+          <select id="semester-toggle" class="select">
+            <option value="1">1학기</option>
+            <option value="2">2학기</option>
+          </select>
+          <button id="add-row" class="btn">행 추가</button>
+        </div>
+      </div>
+      <div class="panel-body">
+        <form id="one-a-max-form" class="form-grid" autocomplete="off">
+          <div class="field" style="grid-column: 1 / -1;">
+            <div class="muted">예: 과목1, 병원1, 4, 4, 4, 4, 0, 0, 0 (기간 수 만큼 입력)</div>
+          </div>
+
+          <section id="max-rows" class="card" style="grid-column: 1 / -1;">
+            <div id="max-empty" class="muted">행이 없습니다. "행 추가"를 눌러 시작하세요.</div>
+          </section>
+
+          <div class="actions">
+            <a href="index.html" class="btn">이전</a>
+            <a href="#" id="go-min" class="btn primary">다음 (최소 인원 입력)</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p class="footer-text">원주캠퍼스 : 강원특별자치도 원주시 흥업면 남원로 150 보건복지대학1호관(W5)</p>
+    </div>
+  </footer>
+
+  <script src="page-1a-max.js"></script>
+</body>
+</html>

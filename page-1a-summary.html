@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>1-A 요약</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+  <div class="superbar">
+    <div class="container superbar-inner">배치 설정 도구</div>
+  </div>
+  <header class="topbar">
+    <div class="topbar-inner container">
+      <div class="brand">국립강릉원주대학교 간호학과(실습 배치 페이지)</div>
+    </div>
+  </header>
+
+  <div class="page-hero">
+    <div class="container">
+      <div class="breadcrumbs">
+        <a href="index.html">배치 입력</a>
+        <span class="sep">&gt;</span>
+        <a href="page-1a.html">1-A 최대 인원</a>
+        <span class="sep">&gt;</span>
+        <a href="page-1a-min.html">1-A 최소 인원</a>
+        <span class="sep">&gt;</span>
+        <span>요약</span>
+      </div>
+      <h1 class="page-title">입력 내용 요약</h1>
+    </div>
+  </div>
+
+  <main class="container page-content">
+    <div class="panel">
+      <div class="panel-header">
+        <h2 class="panel-title">기본 설정</h2>
+      </div>
+      <div class="panel-body">
+        <div class="table-wrap">
+          <table class="table">
+            <tbody id="basic-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <h2 class="panel-title">최대/최소 인원</h2>
+      </div>
+      <div class="panel-body">
+        <div class="table-wrap">
+          <table class="table">
+            <thead id="maxmin-head"></thead>
+            <tbody id="maxmin-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <a href="page-1a-min.html" class="btn">이전</a>
+      <button id="export-config" class="btn primary">web_config.json 저장</button>
+      <button id="export-image" class="btn primary">최대/최소 인원 표 이미지 저장</button>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p class="footer-text">원주캠퍼스 : 강원특별자치도 원주시 흥업면 남원로 150 보건복지대학1호관(W5)</p>
+    </div>
+  </footer>
+
+  <script src="page-1a-summary.js"></script>
+</body>
+</html>

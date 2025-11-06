@@ -1,0 +1,109 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; color: #1f2937; background: #f5f7fb; }
+
+.container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+
+/* Top bar */
+.topbar { background: #0b4a8f; color: #fff; }
+.topbar-inner { display: flex; align-items: center; justify-content: space-between; height: 56px; }
+.brand { font-weight: 700; letter-spacing: 0.2px; }
+.topnav { display: flex; gap: 16px; }
+.topnav-link { color: #e6f0fb; text-decoration: none; font-size: 14px; }
+.topnav-link:hover { text-decoration: underline; }
+
+/* Page hero and breadcrumbs */
+.page-hero { background: #eaf1fb; border-bottom: 1px solid #d9e6fb; }
+.breadcrumbs { display: flex; align-items: center; gap: 8px; padding-top: 18px; color: #6b7280; font-size: 14px; }
+.breadcrumbs a { color: #1f3370; text-decoration: none; }
+.breadcrumbs a:hover { text-decoration: underline; }
+.breadcrumbs .sep { color: #9aa7c1; }
+.page-title { margin: 8px 0 18px; font-size: 28px; font-weight: 700; color: #1f3370; }
+
+.page-content { padding: 24px 0 40px; }
+
+/* Panels and cards */
+.panel { background: #ffffff; border: 1px solid #e5ebf5; border-radius: 10px; box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04); margin-bottom: 20px; }
+.panel-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid #eef2f8; }
+.panel-title { margin: 0; font-size: 18px; color: #1f3370; }
+.panel-body { padding: 16px; }
+
+.card { background: #fbfdff; border: 1px dashed #d7e3f8; border-radius: 8px; padding: 14px; }
+
+/* Form */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px; }
+.field { display: flex; flex-direction: column; gap: 8px; }
+.field.inline { grid-column: 1 / -1; }
+label { font-weight: 600; color: #334155; }
+input[type="number"], input[type="text"], select.select { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: #ffffff; font-size: 14px; }
+input:focus, select:focus { outline: 3px solid rgba(37, 99, 235, 0.15); border-color: #2563eb; }
+
+.period-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; white-space: nowrap; }
+.period-label { font-weight: 600; color: #374151; }
+.period-row .select { width: 160px; padding: 8px 10px; font-size: 13px; }
+
+.actions { grid-column: 1 / -1; display: flex; gap: 12px; margin-top: 8px; }
+.muted { color: #6b7280; margin: 0; }
+.hidden { display: none; }
+
+/* Buttons */
+.btn { cursor: pointer; border: 1px solid #cbd5e1; background: #ffffff; color: #1f2937; padding: 10px 14px; border-radius: 8px; font-size: 14px; transition: background 0.15s ease, box-shadow 0.15s ease; }
+.btn:hover { background: #f3f6fb; }
+.btn.primary { background: #1f5fbf; border-color: #1a4f9e; color: #ffffff; }
+.btn.primary:hover { background: #184f9e; }
+.btn.subtle { background: #f1f5f9; }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Output / code */
+pre { margin: 0; background: #0b1020; color: #d1e7ff; padding: 12px; border-radius: 8px; overflow: auto; font-size: 13px; }
+
+/* Footer */
+.site-footer { background: #0b4a8f; color: #e6f0fb; margin-top: 20px; }
+.footer-text { margin: 0; padding: 14px 0; font-size: 13px; }
+
+/* 1-A rows */
+.row-grid { display: grid; grid-template-columns: 1.2fr 1.2fr 0.6fr 0.6fr auto; gap: 10px; align-items: center; margin-bottom: 10px; }
+.row-input { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: #ffffff; font-size: 14px; }
+.row-input:focus { outline: 3px solid rgba(37, 99, 235, 0.15); border-color: #2563eb; }
+
+/* Period group */
+.period-group-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.period-group-title { margin: 0; font-size: 16px; color: #1f3370; }
+.period-rows { display: flex; flex-direction: column; }
+
+/* Dynamic row grid (max/min pages) */
+.row-grid-dynamic { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; overflow-x: auto; white-space: nowrap; padding-bottom: 4px; scrollbar-gutter: stable; }
+.row-grid-dynamic > input[type="text"] { width: 150px; min-width: 150px; }
+/* 기간 입력칸 가독성 확보 및 줄바꿈/축소 방지 */
+.row-grid-dynamic > input { flex: 0 0 auto; }
+/* input[type=number]의 width:100%를 이기기 위해 특이성 상승 */
+input.period-input { width: 80px; min-width: 80px; text-align: right; }
+.row-grid-dynamic .btn { padding: 6px 10px; flex: 0 0 auto; }
+
+/* 행 그룹 전체에 가로 스크롤 제공 (8개 이상 기간에서도 보기 편하도록) */
+#max-rows, #min-rows { overflow-x: auto; scrollbar-gutter: stable both-edges; }
+
+/* number input 스핀버튼 제거로 가독 공간 확보 */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; }
+
+/* 학기 반대 기간 비활성 칸 표시 */
+.period-disabled { background: #f3f4f6; color: #6b7280; }
+
+/* Error state */
+.input-error { border-color: #ef4444 !important; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important; }
+
+/* Tables */
+.table-wrap { width: 100%; overflow: auto; }
+.table { width: 100%; border-collapse: collapse; background: #ffffff; font-size: 14px; }
+.table th, .table td { border: 1px solid #e5ebf5; padding: 8px 10px; text-align: left; white-space: nowrap; }
+.table thead th { background: #f2f6fd; color: #1f3370; font-weight: 700; }
+.table tbody tr:nth-child(even) { background: #fafcff; }
+
+/* Superbar (line above header) */
+.superbar { background: #073a72; color: #e6f0fb; font-size: 13px; }
+.superbar-inner { height: 34px; display: flex; align-items: center; }
+
+@media (max-width: 920px) {
+  .form-grid { grid-template-columns: 1fr; }
+}

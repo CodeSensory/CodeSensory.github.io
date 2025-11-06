@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>배치 입력 페이지</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="superbar">
+    <div class="container superbar-inner">배치 설정 도구</div>
+  </div>
+  <header class="topbar">
+    <div class="topbar-inner container">
+      <div class="brand">국립강릉원주대학교 간호학과(실습 배치 페이지)</div>
+      <nav class="topnav"></nav>
+    </div>
+  </header>
+
+  <div class="page-hero">
+    <div class="container">
+      <div class="breadcrumbs">
+        <span>배치 입력</span>
+      </div>
+      <h1 class="page-title">배치 파라미터 입력</h1>
+    </div>
+  </div>
+
+  <main class="container page-content">
+    <div class="panel">
+      <div class="panel-header">
+        <h2 class="panel-title">입력 폼</h2>
+      </div>
+      <div class="panel-body">
+        <form id="config-form" class="form-grid">
+          <div class="field">
+            <label for="num-a">A반 학생 수</label>
+            <input id="num-a" name="numA" type="number" min="0" placeholder="예: 40" required />
+          </div>
+
+          <div class="field">
+            <label for="num-b">B반 학생 수</label>
+            <input id="num-b" name="numB" type="number" min="0" placeholder="예: 40" required />
+          </div>
+
+          <div class="field">
+            <label for="num-periods">기간 수</label>
+            <input id="num-periods" name="numPeriods" type="number" min="1" placeholder="예: 7" required />
+          </div>
+
+          <div class="field inline">
+            <button type="button" id="build-periods" class="btn">기간별 입력 생성</button>
+          </div>
+
+          <section id="period-assignments" class="card">
+            <p class="muted">"기간별 입력 생성" 버튼을 눌러 기간별 반/학기 선택을 만들어주세요.</p>
+          </section>
+
+          <div class="actions">
+            <a href="page-1a.html" id="go-1a" class="btn">다음 (1-A 설정)</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p class="footer-text">원주캠퍼스 : 강원특별자치도 원주시 흥업면 남원로 150 보건복지대학1호관(W5) | TEL 033-760-8640</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

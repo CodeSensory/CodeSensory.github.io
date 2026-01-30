@@ -1,0 +1,158 @@
+const BOARD_TABLE = 'announcements';
+const PAGE_SIZE = 10;
+
+let boardPosts = [];
+let filteredPosts = [];
+let currentPage = 1;
+let selectedPostId = null;
+let isLoading = false;
+
+document.addEventListener('DOMContentLoaded', () => {
+  fetchBoardPosts();
+
+  document.getElementById('board-search-btn').addEventListener('click', handleSearch);
+  document.getElementById('board-search-input').addEventListener('keypress', (event) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      handleSearch();
+    }
+  });
+
+  document.getElementById('board-refresh-btn').addEventListener('click', () => {
+    document.getElementById('board-search-input').value = '';
+    currentPage = 1;
+    fetchBoardPosts();
+  });
+
+  document.getElementById('board-write-btn').addEventListener('click', () => {
+    window.location.href = 'board-write.html';
+  });
+
+  document.getElementById('board-prev-page').addEventListener('click', () => {
+    if (currentPage > 1) {
+      currentPage -= 1;
+      renderBoardTable();
+    }
+  });
+
+  document.getElementById('board-next-page').addEventListener('click', () => {
+    const totalPages = Math.max(1, Math.ceil(filteredPosts.length / PAGE_SIZE));
+    if (currentPage < totalPages) {
+      currentPage += 1;
+      renderBoardTable();
+    }
+  });
+});
+
+async function fetchBoardPosts() {
+  if (isLoading) return;
+  isLoading = true;
+  const statusEl = document.getElementById('board-status');
+  statusEl.textContent = '게시글을 불러오는 중입니다...';
+
+  try {
+    const { data, error } = await supabase
+      .from(BOARD_TABLE)
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    boardPosts = data || [];
+    filteredPosts = [...boardPosts];
+    currentPage = 1;
+    renderBoardTable();
+    statusEl.textContent = `총 ${filteredPosts.length}건의 게시글이 있습니다.`;
+  } catch (err) {
+    console.error(err);
+    statusEl.textContent = `게시글을 불러오지 못했습니다: ${err.message}`;
+  } finally {
+    isLoading = false;
+  }
+}
+
+function handleSearch() {
+  const keyword = document.getElementById('board-search-input').value.trim().toLowerCase();
+  if (!keyword) {
+    filteredPosts = [...boardPosts];
+  } else {
+    filteredPosts = boardPosts.filter((post) => {
+      return (
+        post.title?.toLowerCase().includes(keyword) ||
+        post.author?.toLowerCase().includes(keyword)
+      );
+    });
+  }
+  currentPage = 1;
+  renderBoardTable();
+}
+
+function renderBoardTable() {
+  const tbody = document.querySelector('#board-table tbody');
+  const statusEl = document.getElementById('board-status');
+  const totalCountEl = document.getElementById('board-total-count');
+  const paginationInfo = document.getElementById('board-pagination-info');
+
+  totalCountEl.textContent = filteredPosts.length;
+
+  if (!filteredPosts.length) {
+    tbody.innerHTML = `<tr><td colspan="5" style="padding: 32px; color: var(--text-muted); text-align: center;">등록된 게시글이 없습니다.</td></tr>`;
+    paginationInfo.textContent = '0 / 0';
+    toggleDetail(false);
+    statusEl.textContent = '게시글이 없습니다. 새로운 글을 등록해 주세요.';
+    return;
+  }
+
+  const totalPages = Math.max(1, Math.ceil(filteredPosts.length / PAGE_SIZE));
+  currentPage = Math.min(currentPage, totalPages);
+  const startIndex = (currentPage - 1) * PAGE_SIZE;
+  const paginatedRows = filteredPosts.slice(startIndex, startIndex + PAGE_SIZE);
+
+  tbody.innerHTML = paginatedRows
+    .map((post, idx) => {
+      const number = filteredPosts.length - (startIndex + idx);
+      return `
+        <tr data-id="${post.id}">
+          <td>${number}</td>
+          <td class="board-title-cell" style="cursor: pointer;">${post.title}</td>
+          <td>${post.author}</td>
+          <td>${formatDate(post.created_at)}</td>
+          <td>${post.views ?? 0}</td>
+        </tr>
+      `;
+    })
+    .join('');
+
+  paginationInfo.textContent = `${currentPage} / ${totalPages}`;
+
+  tbody.querySelectorAll('tr').forEach((row) => {
+    const titleCell = row.querySelector('.board-title-cell');
+    titleCell.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const postId = row.dataset.id;
+      window.location.href = `board-detail.html?id=${postId}`;
+    });
+  });
+
+  statusEl.textContent = `총 ${filteredPosts.length}건 중 ${paginatedRows.length}건을 표시합니다.`;
+}
+
+
+function formatDate(dateString, includeTime = false) {
+  if (!dateString) return '-';
+  const date = new Date(dateString);
+  const options = includeTime
+    ? { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }
+    : { year: 'numeric', month: '2-digit', day: '2-digit' };
+  return date.toLocaleDateString('ko-KR', options);
+}
+
+function formatContent(content) {
+  if (!content) return '';
+  const escaped = content
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  return escaped.replace(/\n/g, '<br />');
+}
+

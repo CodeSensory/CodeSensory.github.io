@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>새 글 작성</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.2/dist/umd/supabase.js"></script>
+</head>
+
+<body>
+  <div class="page-shell">
+    <header class="site-header">
+      <div class="logo">
+        <span>국립강릉원주대학교</span>
+        <strong>간호학과 성적 관리</strong>
+      </div>
+      <nav class="global-nav">
+        <a href="input.html">성적 입력/관리</a>
+        <a href="view.html">성적 조회</a>
+        <a href="summary.html">성적 요약</a>
+        <a href="manage.html">관리 필요</a>
+        <a href="board.html">게시판</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div class="hero-content">
+        <p class="hero-kicker">NEW POST</p>
+        <h1>새 글 작성</h1>
+        <p>필요한 안내 사항을 작성해 주세요.</p>
+      </div>
+    </section>
+
+    <main class="content-grid">
+      <section class="panel">
+        <div class="toolbar" style="margin-bottom: 16px;">
+          <button class="secondary" type="button" id="back-btn">← 목록으로</button>
+        </div>
+        
+        <form id="board-form" class="board-form">
+          <label>
+            제목
+            <input type="text" id="board-title" name="title" placeholder="제목을 입력하세요" required />
+          </label>
+          <label>
+            작성자
+            <input type="text" id="board-author" name="author" placeholder="작성자를 입력하세요" required />
+          </label>
+          <label>
+            내용
+            <textarea id="board-content" name="content" rows="10" placeholder="내용을 입력하세요" required style="min-height: 300px;"></textarea>
+          </label>
+          <div class="toolbar" style="justify-content: flex-end; margin-top: 16px;">
+            <button class="secondary" type="button" id="cancel-btn">취소</button>
+            <button class="primary" type="submit">등록하기</button>
+          </div>
+          <div class="status" id="board-form-status"></div>
+        </form>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      © 국립강릉원주대학교 간호학과 – 학사행정 전용 도구</br>문의: codesensory@gmail.com
+    </footer>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="js/board-write.js"></script>
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+

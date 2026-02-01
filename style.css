@@ -56,6 +56,18 @@ body {
   box-sizing: border-box;
 }
 
+.logo-link {
+  text-decoration: none;
+  color: inherit;
+  display: inline-flex;
+  cursor: pointer;
+}
+
+.logo-link:hover .logo,
+.logo-link:focus .logo {
+  opacity: 0.9;
+}
+
 .logo {
   font-weight: 700;
   color: var(--text-primary);
@@ -670,6 +682,21 @@ td.low-achievement-cell {
   color: var(--text-primary);
 }
 
+.board-notice-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--mclaren-orange);
+  border-radius: 4px;
+  vertical-align: middle;
+}
+
+.board-row-notice .board-title-cell {
+  color: var(--mclaren-orange-dark);
+}
+
 .board-pagination {
   display: flex;
   justify-content: center;
@@ -742,6 +769,16 @@ td.low-achievement-cell {
   min-height: 180px;
 }
 
+.board-prev-next-link {
+  color: var(--mclaren-orange);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.board-prev-next-link:hover {
+  text-decoration: underline;
+}
+
 .board-detail-actions {
   display: flex;
   justify-content: flex-end;
@@ -783,12 +820,137 @@ td.low-achievement-cell {
   box-shadow: 0 0 0 2px rgba(255, 128, 0, 0.15);
 }
 
+/* 로그인/회원가입/비밀번호초기화 페이지 */
+.auth-header .global-nav {
+  display: none;
+}
+
+.auth-panel {
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.auth-form input {
+  padding: 12px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 15px;
+  font-family: inherit;
+}
+
+.auth-form input:focus {
+  outline: none;
+  border-color: var(--mclaren-orange);
+  box-shadow: 0 0 0 2px rgba(255, 128, 0, 0.15);
+}
+
+.auth-form-actions {
+  margin-top: 8px;
+}
+
+.auth-form-actions .primary {
+  width: 100%;
+  padding: 12px 20px;
+  font-size: 16px;
+}
+
+.auth-links {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  gap: 16px;
+  font-size: 14px;
+}
+
+.auth-links a {
+  color: var(--mclaren-orange);
+  text-decoration: none;
+}
+
+.auth-links a:hover {
+  text-decoration: underline;
+}
+
 .board-toolbar {
   gap: 8px;
 }
 
 .board-toolbar input {
   flex: 1;
+}
+
+/* 페이지별 기능 안내 (게시판 하단) */
+.board-guide-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.board-guide-item {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-primary);
+}
+.board-guide-item summary {
+  padding: 14px 16px;
+  cursor: pointer;
+  font-size: 15px;
+  list-style: none;
+  user-select: none;
+  background: var(--bg-secondary);
+}
+.board-guide-item summary::-webkit-details-marker {
+  display: none;
+}
+.board-guide-item summary::before {
+  content: '▶';
+  display: inline-block;
+  margin-right: 10px;
+  font-size: 10px;
+  transition: transform 0.2s;
+}
+.board-guide-item[open] summary::before {
+  transform: rotate(90deg);
+}
+.board-guide-item summary:hover {
+  background: var(--bg-tertiary);
+}
+.board-guide-content {
+  padding: 16px 16px 20px 36px;
+  border-top: 1px solid var(--border-color);
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+.board-guide-content h4 {
+  margin: 16px 0 8px;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+.board-guide-content h4:first-child {
+  margin-top: 0;
+}
+.board-guide-content p,
+.board-guide-content ul {
+  margin: 0 0 10px;
+}
+.board-guide-content li {
+  margin-bottom: 4px;
 }
 
 @media (max-width: 1024px) {
@@ -903,4 +1065,41 @@ td.low-achievement-cell {
   td {
     padding: 8px 10px;
   }
+}
+
+/* 성적 조회: 재수강 점수 표시 (빨간색) */
+.retake-score {
+  color: #c00;
+  font-weight: 600;
+}
+
+/* 재수강 모달 */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 16px;
+}
+.modal-content {
+  background: var(--bg-primary);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  width: 100%;
+}
+.retake-subjects-table tbody tr {
+  cursor: pointer;
+}
+.retake-subjects-table tbody tr:hover {
+  background: var(--bg-tertiary);
+}
+
+/* 재수강 인원 조회: 현재 점수/달성도(예: 9(상)) 빨간색 */
+.retake-list-current {
+  color: #c00;
+  font-weight: 600;
 }

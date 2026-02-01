@@ -5,20 +5,34 @@ let allGradeData = []; // 원본 데이터 보관 (달성도 포함)
 let selectedRowForEdit = null; // 수정할 행 데이터
 let currentLevel = 'l1'; // 현재 선택된 레벨
 
-// 성적에서 점수만 추출하는 함수 ("점수(연도, 과목명)" 형식에서 점수만 반환)
+// 성적에서 점수만 추출 ("점수(연도, 과목명)" 또는 재수강 "점수(연도, 과목, 이전점수)" 형식에서 맨 앞 점수만 반환)
 function extractScore(value) {
   if (value === null || value === undefined || value === '') {
     return '-';
   }
   const strValue = String(value);
-  // "점수(연도, 과목명)" 형식에서 점수만 추출 (소수점 포함)
-  // \d+(?:\.\d+)? 는 정수 또는 소수점을 포함한 숫자를 매칭
-  const match = strValue.match(/^(\d+(?:\.\d+)?)(?:\([^)]*\))?$/);
+  const match = strValue.match(/^(\d+(?:\.\d+)?)/);
   if (match) {
     return match[1];
   }
-  // 형식이 맞지 않으면 그대로 반환
   return strValue;
+}
+
+// 재수강 점수 여부 (점수(수강 년도, 수강 과목, 이전 점수) 형식 → 괄호 안에 쉼표가 2개 이상)
+function isRetakeScore(value) {
+  if (value === null || value === undefined || value === '') return false;
+  const s = String(value).trim();
+  if (!s.includes('(') || !s.includes(')')) return false;
+  return (s.match(/,/g) || []).length >= 2;
+}
+
+// 점수 표시 HTML (재수강이면 빨간색 클래스 적용)
+function scoreCellHtml(rawValue, displayValue) {
+  const text = displayValue !== undefined && displayValue !== '' ? displayValue : '-';
+  if (isRetakeScore(rawValue)) {
+    return `<span class="retake-score">${text}</span>`;
+  }
+  return text;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -280,16 +294,19 @@ function renderSearchResultTable(rows) {
         return '';
       }
       
-      // 모든 레벨의 성적을 3열로 표시 (점수)
+      // 모든 레벨의 성적을 3열로 표시 (점수, 재수강은 빨간색)
       const subjectScoreCells = subjectIndices
         .map((idx) => {
           const l1Key = getSubjectKey('l1', idx);
           const l2Key = getSubjectKey('l2', idx);
           const l3Key = getSubjectKey('l3', idx);
-          const l1Value = extractScore(rawData[l1Key]);
-          const l2Value = extractScore(rawData[l2Key]);
-          const l3Value = extractScore(rawData[l3Key]);
-          return `<td>${l1Value}</td><td>${l2Value}</td><td>${l3Value}</td>`;
+          const l1Raw = rawData[l1Key];
+          const l2Raw = rawData[l2Key];
+          const l3Raw = rawData[l3Key];
+          const l1Html = scoreCellHtml(l1Raw, extractScore(l1Raw));
+          const l2Html = scoreCellHtml(l2Raw, extractScore(l2Raw));
+          const l3Html = scoreCellHtml(l3Raw, extractScore(l3Raw));
+          return `<td>${l1Html}</td><td>${l2Html}</td><td>${l3Html}</td>`;
         })
         .join('');
       
@@ -370,13 +387,15 @@ function renderTableBody(rows) {
 
   tbody.innerHTML = rows
     .map((row) => {
-      // 현재 레벨의 성적 표시 (점수만 표시)
+      // 현재 레벨의 성적 표시 (점수만 표시, 재수강은 빨간색)
       const subjectCells = subjectIndices
         .map((idx) => {
           const levelSubjectKey = getSubjectKey(currentLevel, idx);
-          const rawData = allGradeData.find(r => r.student_id === row.student_id);
-          const value = rawData ? extractScore(rawData[levelSubjectKey]) : '-';
-          return `<td>${value}</td>`;
+          const raw = allGradeData.find(r => r.student_id === row.student_id);
+          const rawValue = raw ? raw[levelSubjectKey] : null;
+          const displayValue = raw ? extractScore(rawValue) : '-';
+          const cellHtml = scoreCellHtml(rawValue, displayValue);
+          return `<td>${cellHtml}</td>`;
         })
         .join('');
       const note = row.note || '-';

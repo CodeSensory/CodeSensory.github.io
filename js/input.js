@@ -1,6 +1,68 @@
 let currentStudentData = null;
 let currentLevel = 'l1'; // 현재 선택된 레벨
 
+// 재수강 점수 여부 (괄호 안에 쉼표 2개 이상)
+function isRetakeScoreValue(value) {
+  if (value === null || value === undefined || value === '') return false;
+  const s = String(value).trim();
+  return s.includes('(') && (s.match(/,/g) || []).length >= 2;
+}
+// 재수강 달성도 여부 (괄호 포함, 예: 중(하))
+function isRetakeAchievementValue(value) {
+  if (value === null || value === undefined || value === '') return false;
+  return String(value).trim().indexOf('(') > 0;
+}
+// 해당 레벨·과목이 재수강인지 (점수 또는 달성도가 재수강 형식)
+function isSubjectRetake(data, level, index) {
+  if (!data) return false;
+  const sk = getSubjectKey(level, index);
+  const ak = getAchievementKey(level, index);
+  return isRetakeScoreValue(data[sk]) || isRetakeAchievementValue(data[ak]);
+}
+
+// 점수 셀 표시용 파싱 (일반 "점수(연도,과목)" 및 재수강 "점수(연도,과목,이전)" 모두 처리)
+function parseScoreForDisplay(value) {
+  const out = { score: '', year: '', subjectName: '' };
+  if (value === null || value === undefined || value === '') return out;
+  const s = String(value).trim();
+  const numMatch = s.match(/^(\d+(?:\.\d+)?)/);
+  if (numMatch) out.score = numMatch[1];
+  const innerMatch = s.match(/^\d+(?:\.\d+)?\((.*)\)$/s);
+  if (!innerMatch) return out;
+  const parts = innerMatch[1].split(/\s*,\s*/, 3);
+  if (parts[0]) out.year = parts[0].trim();
+  if (parts[1]) out.subjectName = parts[1].trim();
+  return out;
+}
+// 달성도 표시용 (괄호 앞까지)
+function getDisplayAchievement(value) {
+  if (value === null || value === undefined || value === '') return '';
+  const s = String(value).trim();
+  const i = s.indexOf('(');
+  return i > 0 ? s.slice(0, i) : s;
+}
+
+// 재수강 해당 과목만 읽기 전용으로 설정 (현재 레벨 기준)
+function applyRetakeSubjectLocks(data) {
+  SUBJECTS.forEach((subjectKey, index) => {
+    const levelSubjectKey = getSubjectKey(currentLevel, index);
+    const levelAchievementKey = getAchievementKey(currentLevel, index);
+    const yearInputName = `${levelSubjectKey}_year`;
+    const subjectNameInputName = `${levelSubjectKey}_subject_name`;
+    const scoreInput = document.querySelector(`input[name="${levelSubjectKey}"]`);
+    const yearInput = document.querySelector(`input[name="${yearInputName}"]`);
+    const subjectNameInput = document.querySelector(`input[name="${subjectNameInputName}"]`);
+    const achievementSelect = document.querySelector(`select[name="${levelAchievementKey}"]`);
+    const locked = data && isSubjectRetake(data, currentLevel, index);
+    [scoreInput, yearInput, subjectNameInput, achievementSelect].forEach((el) => {
+      if (el) {
+        el.disabled = locked;
+        if (el.readOnly !== undefined) el.readOnly = locked;
+      }
+    });
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   renderSubjectsTable();
   
@@ -150,7 +212,7 @@ async function searchStudent(studentId) {
       // 기존 학생 데이터 발견
       currentStudentData = data;
       
-      // 현재 레벨의 기존 성적 표시
+      // 현재 레벨의 기존 성적 표시 (일반/재수강 형식 모두 파싱)
       SUBJECTS.forEach((subjectKey, index) => {
         const levelSubjectKey = getSubjectKey(currentLevel, index);
         const levelAchievementKey = getAchievementKey(currentLevel, index);
@@ -162,28 +224,17 @@ async function searchStudent(studentId) {
         const subjectNameInput = document.querySelector(`input[name="${subjectNameInputName}"]`);
         
         if (input && data[levelSubjectKey] !== null && data[levelSubjectKey] !== undefined) {
-          const value = String(data[levelSubjectKey]);
-          // "점수(연도, 과목명)" 형식에서 점수, 연도, 과목명 분리 (소수점 포함)
-          // \d+(?:\.\d+)? 는 정수 또는 소수점을 포함한 숫자를 매칭
-          const match = value.match(/^(\d+(?:\.\d+)?)(?:\(([^,]*),\s*([^)]*)\))?$/);
-          if (match) {
-            const score = match[1];
-            const year = match[2] || '';
-            const subjectName = match[3] || '';
-            input.value = score;
-            if (yearInput) yearInput.value = year.trim();
-            if (subjectNameInput) subjectNameInput.value = subjectName.trim();
-          } else {
-            // 형식이 맞지 않으면 그대로 표시
-            input.value = value;
-          }
+          const parsed = parseScoreForDisplay(data[levelSubjectKey]);
+          input.value = parsed.score || '';
+          if (yearInput) yearInput.value = parsed.year || '';
+          if (subjectNameInput) subjectNameInput.value = parsed.subjectName || '';
         }
         
-        // 달성도 표시
+        // 달성도 표시 (재수강 형식 "중(하)" → 괄호 앞 "중"으로 선택)
         const achievementSelect = document.querySelector(`select[name="${levelAchievementKey}"]`);
         if (achievementSelect) {
-          const achievementValue = data[levelAchievementKey] || '';
-          achievementSelect.value = achievementValue;
+          const displayAch = getDisplayAchievement(data[levelAchievementKey]);
+          achievementSelect.value = displayAch || '';
         }
       });
       
@@ -199,18 +250,17 @@ async function searchStudent(studentId) {
         graduateYearInput.value = data.graduate_year;
       }
       
-      statusEl.textContent = `기존 학생 데이터를 불러왔습니다. (학번: ${data.student_id}, 레벨: ${currentLevel})`;
+      // 재수강 해당 과목만 수정 불가 처리
+      applyRetakeSubjectLocks(data);
+      statusEl.textContent = `기존 학생 데이터를 불러왔습니다. (학번: ${data.student_id}, 레벨: ${currentLevel}) 재수강 과목은 수정할 수 없습니다.`;
       statusEl.style.color = 'var(--mclaren-orange)';
-      
-      // 삭제 버튼 표시
       document.getElementById('delete-student-btn').style.display = 'block';
     } else {
       // 신규 학생
       currentStudentData = null;
+      applyRetakeSubjectLocks(null);
       statusEl.textContent = '신규 학생입니다.';
       statusEl.style.color = 'var(--text-secondary)';
-      
-      // 삭제 버튼 숨김
       document.getElementById('delete-student-btn').style.display = 'none';
     }
   } catch (err) {
@@ -223,6 +273,8 @@ async function searchStudent(studentId) {
 
 function clearStudentData() {
   currentStudentData = null;
+  isRetakeLocked = false;
+  setFormReadOnly(false);
   document.getElementById('search-status').textContent = '';
   document.getElementById('delete-student-btn').style.display = 'none';
   document.querySelectorAll('.subject-input').forEach(input => {
@@ -342,12 +394,17 @@ async function handleManualSubmit(event) {
         student_id: studentId,
       };
       
-      // 현재 레벨의 입력된 과목만 업데이트
+      // 현재 레벨의 입력된 과목만 업데이트 (재수강 과목은 기존 값 유지)
       SUBJECTS.forEach((subjectKey, index) => {
         const levelSubjectKey = getSubjectKey(level, index);
         const levelAchievementKey = getAchievementKey(level, index);
         const yearInputName = `${levelSubjectKey}_year`;
         const subjectNameInputName = `${levelSubjectKey}_subject_name`;
+        
+        // 재수강 과목은 이 페이지에서 수정 불가 → updateData에 넣지 않아 기존 값 유지
+        if (currentStudentData && isSubjectRetake(currentStudentData, level, index)) {
+          return;
+        }
         
         const input = document.querySelector(`input[name="${levelSubjectKey}"]`);
         const yearInput = document.querySelector(`input[name="${yearInputName}"]`);
@@ -643,9 +700,11 @@ async function handleXlsxUpload() {
         return;
       }
 
-      // localStorage에 저장하고 미리보기 페이지로 이동 (레벨 정보도 함께 저장)
+      // localStorage에 저장하고 미리보기 페이지로 이동 (레벨, 연도, 과목명 포함)
       localStorage.setItem('excelPreviewData', JSON.stringify(parsedData));
       localStorage.setItem('excelPreviewLevel', selectedLevel);
+      localStorage.setItem('excelPreviewYear', commonYear || '');
+      localStorage.setItem('excelPreviewSubjectName', commonSubjectName || '');
       statusEl.textContent = `${parsedData.length}건의 데이터를 읽었습니다. (레벨: ${selectedLevel}) 미리보기 페이지로 이동합니다...`;
       
       setTimeout(() => {

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>간호학과 성적 관리</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.2/dist/umd/supabase.js"></script>
+  <script src="config.js"></script>
+  <script src="js/auth.js"></script>
+</head>
+
+<body>
+  <p style="padding: 20px;">이동 중...</p>
+  <script>
+    if (typeof Auth !== 'undefined' && Auth.getSession()) {
+      window.location.href = 'view.html';
+    } else {
+      window.location.href = 'login.html';
+    }
+  </script>
+</body>
+
+</html>

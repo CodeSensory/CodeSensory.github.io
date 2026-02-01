@@ -5,6 +5,12 @@ const SUPABASE_ANON_KEY = 'sb_publishable_3rPJ17sh_tLWavZbMSx2DA_Kay-hUiq';
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// Edge Function 호출용 (요청 알림 이메일 등)
+if (typeof window !== 'undefined') {
+  window.SUPABASE_URL = SUPABASE_URL;
+  window.SUPABASE_ANON_KEY = SUPABASE_ANON_KEY;
+}
+
 // 레벨 정의
 const LEVELS = ['l1', 'l2', 'l3'];
 

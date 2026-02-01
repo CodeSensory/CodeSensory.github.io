@@ -12,17 +12,13 @@
 <body>
   <div class="page-shell">
     <header class="site-header">
-      <div class="logo">
-        <span>국립강릉원주대학교</span>
-        <strong>간호학과 성적 관리</strong>
-      </div>
-      <nav class="global-nav">
-        <a href="input.html">성적 입력/관리</a>
-        <a href="view.html">성적 조회</a>
-        <a href="summary.html">성적 요약</a>
-        <a href="manage.html">관리 필요</a>
-        <a href="board.html">게시판</a>
-      </nav>
+      <a href="view.html" id="logo-link" class="logo-link">
+        <div class="logo">
+          <span>국립강릉원주대학교</span>
+          <strong>간호학과 성적 관리</strong>
+        </div>
+      </a>
+      <nav class="global-nav"></nav>
     </header>
 
     <section class="hero">
@@ -46,7 +42,7 @@
           </label>
           <label>
             작성자
-            <input type="text" id="board-author" name="author" placeholder="작성자를 입력하세요" required />
+            <input type="text" id="board-author" name="author" placeholder="[직함]이름 (로그인 정보)" readonly />
           </label>
           <label>
             내용
@@ -67,7 +63,9 @@
   </div>
 
   <script src="config.js"></script>
+  <script src="js/auth.js"></script>
   <script src="js/board-write.js"></script>
+  <script src="js/nav.js"></script>
 </body>
 
 </html>

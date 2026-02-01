@@ -12,17 +12,13 @@
 <body>
   <div class="page-shell">
     <header class="site-header">
-      <div class="logo">
-        <span>국립강릉원주대학교</span>
-        <strong>간호학과 성적 관리</strong>
-      </div>
-      <nav class="global-nav">
-        <a href="input.html">성적 입력/관리</a>
-        <a href="view.html">성적 조회</a>
-        <a href="summary.html">성적 요약</a>
-        <a href="manage.html">관리 필요</a>
-        <a class="is-active" href="board.html">게시판</a>
-      </nav>
+      <a href="view.html" id="logo-link" class="logo-link">
+        <div class="logo">
+          <span>국립강릉원주대학교</span>
+          <strong>간호학과 성적 관리</strong>
+        </div>
+      </a>
+      <nav class="global-nav"></nav>
     </header>
 
     <section class="hero">
@@ -41,11 +37,19 @@
       </div>
     </section>
 
+    <div class="content-grid" style="padding: 0 16px 24px;">
+      <div class="tabs board-tabs" role="tablist">
+        <button type="button" class="tab-button active" role="tab" id="board-tab-btn-posts" aria-selected="true" data-tab="posts">게시글 보기</button>
+        <button type="button" class="tab-button" role="tab" id="board-tab-btn-guide" aria-selected="false" data-tab="guide">페이지별 기능 안내</button>
+      </div>
+    </div>
+
     <main class="content-grid">
+      <div id="board-tab-content-posts" class="tab-content active" role="tabpanel">
       <section class="panel">
         <div class="board-header">
           <div>
-            <h2>커뮤니티 공지사항</h2>
+            <h2>공지사항 및 달성도 정보</h2>
             <p class="board-description">학과 공지 및 안내를 최신순으로 확인하세요.</p>
           </div>
           <div class="board-meta-pill">
@@ -80,6 +84,15 @@
           <button class="secondary" type="button" id="board-next-page">&gt;</button>
         </div>
       </section>
+      </div>
+
+      <div id="board-tab-content-guide" class="tab-content" role="tabpanel">
+        <section class="panel">
+          <h2 style="font-size: 20px; margin-bottom: 16px;">페이지별 기능 안내</h2>
+          <p style="color: var(--text-muted); margin-bottom: 16px;">각 메뉴의 기능과 사용 방법을 상세히 안내합니다. 항목을 클릭하면 내용을 펼쳐 볼 수 있습니다.</p>
+          <div id="board-guide-list" class="board-guide-list"></div>
+        </section>
+      </div>
     </main>
 
     <footer class="site-footer">
@@ -88,7 +101,10 @@
   </div>
 
   <script src="config.js"></script>
+  <script src="js/auth.js"></script>
   <script src="js/board.js"></script>
+  <script src="js/board-guide.js"></script>
+  <script src="js/nav.js"></script>
 </body>
 
 </html>

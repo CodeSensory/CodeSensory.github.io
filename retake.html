@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>재수강 성적 입력</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.2/dist/umd/supabase.js"></script>
+</head>
+
+<body>
+  <div class="page-shell">
+    <header class="site-header">
+      <a href="view.html" id="logo-link" class="logo-link">
+        <div class="logo">
+          <span>국립강릉원주대학교</span>
+          <strong>간호학과 성적 관리</strong>
+        </div>
+      </a>
+      <nav class="global-nav"></nav>
+    </header>
+
+    <section class="hero">
+      <div class="hero-content">
+        <p class="hero-kicker">RETAKE GRADE</p>
+        <h1>재수강 성적 입력</h1>
+        <p>학번을 입력한 뒤, 해당 학생이 있을 경우에만 레벨별 핵심술기 과목의 점수와 성취도를 수정할 수 있습니다.</p>
+      </div>
+      <div class="hero-meta">
+        <h3>입력 안내</h3>
+        <ul>
+          <li>학번 검색 후 해당 학생만 성적 수정 가능</li>
+          <li>레벨(L1/L2/L3)별 과목 점수·성취도 표시</li>
+          <li>과목 클릭 시 수강 년도·과목명·점수·성취도 입력</li>
+          <li>재수강 시 이전 점수/성취도가 기록됩니다</li>
+        </ul>
+      </div>
+    </section>
+
+    <main class="content-grid">
+      <section class="panel">
+        <div class="toolbar">
+          <input type="text" id="retake-search-student" placeholder="학번 입력" />
+          <button class="primary" id="retake-search-btn" type="button">검색</button>
+        </div>
+        <div class="status" id="retake-status"></div>
+
+        <!-- 학생이 있을 때만 표시: 레벨별 성적 테이블 -->
+        <div id="retake-result-section" style="display: none; margin-top: 24px;">
+          <div style="margin-bottom: 16px;">
+            <strong id="retake-student-id-label"></strong> 학생의 핵심술기 과목 성적입니다. 수정할 과목을 클릭하세요.
+          </div>
+          <div class="retake-level-panels">
+            <section class="panel" style="margin-bottom: 24px; border: 1px solid var(--border-color);">
+              <h2 style="font-size: 18px; margin-bottom: 12px;">L1</h2>
+              <div class="table-container" style="max-height: 50vh;">
+                <table class="retake-subjects-table" data-level="l1">
+                  <thead>
+                    <tr>
+                      <th>과목</th>
+                      <th>점수</th>
+                      <th>성취도</th>
+                    </tr>
+                  </thead>
+                  <tbody id="retake-tbody-l1"></tbody>
+                </table>
+              </div>
+            </section>
+            <section class="panel" style="margin-bottom: 24px; border: 1px solid var(--border-color);">
+              <h2 style="font-size: 18px; margin-bottom: 12px;">L2</h2>
+              <div class="table-container" style="max-height: 50vh;">
+                <table class="retake-subjects-table" data-level="l2">
+                  <thead>
+                    <tr>
+                      <th>과목</th>
+                      <th>점수</th>
+                      <th>성취도</th>
+                    </tr>
+                  </thead>
+                  <tbody id="retake-tbody-l2"></tbody>
+                </table>
+              </div>
+            </section>
+            <section class="panel" style="margin-bottom: 24px; border: 1px solid var(--border-color);">
+              <h2 style="font-size: 18px; margin-bottom: 12px;">L3</h2>
+              <div class="table-container" style="max-height: 50vh;">
+                <table class="retake-subjects-table" data-level="l3">
+                  <thead>
+                    <tr>
+                      <th>과목</th>
+                      <th>점수</th>
+                      <th>성취도</th>
+                    </tr>
+                  </thead>
+                  <tbody id="retake-tbody-l3"></tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- 재수강 입력 모달 -->
+    <div id="retake-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-content" style="max-width: 420px;">
+        <h3 style="margin-top: 0; margin-bottom: 16px;">재수강 성적 입력</h3>
+        <form id="retake-edit-form">
+          <input type="hidden" id="retake-modal-level" />
+          <input type="hidden" id="retake-modal-subject-index" />
+          <div style="margin-bottom: 12px;">
+            <label style="display: block; margin-bottom: 4px; font-weight: 600;">수강 년도</label>
+            <input type="number" id="retake-modal-year" min="2000" max="2100" placeholder="예: 2024" style="width: 100%; padding: 8px;" />
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label style="display: block; margin-bottom: 4px; font-weight: 600;">수강 과목</label>
+            <input type="text" id="retake-modal-subject-name" placeholder="과목명 입력" style="width: 100%; padding: 8px;" />
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label style="display: block; margin-bottom: 4px; font-weight: 600;">점수</label>
+            <input type="number" id="retake-modal-score" min="0" max="100" step="0.1" placeholder="0–100" style="width: 100%; padding: 8px;" />
+          </div>
+          <div style="margin-bottom: 16px;">
+            <label style="display: block; margin-bottom: 4px; font-weight: 600;">성취도</label>
+            <select id="retake-modal-achievement" style="width: 100%; padding: 8px;">
+              <option value="">선택 안 함</option>
+              <option value="상">상</option>
+              <option value="중">중</option>
+              <option value="하">하</option>
+            </select>
+          </div>
+          <div class="toolbar" style="justify-content: flex-end; gap: 8px;">
+            <button type="button" class="secondary" id="retake-modal-cancel">취소</button>
+            <button type="submit" class="primary">저장</button>
+          </div>
+        </form>
+        <div class="status" id="retake-modal-status" style="margin-top: 12px;"></div>
+      </div>
+    </div>
+
+    <footer class="site-footer">
+      © 국립강릉원주대학교 간호학과 – 학사행정 전용 도구</br>문의: codesensory@gmail.com
+    </footer>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/retake.js"></script>
+  <script src="js/nav.js"></script>
+</body>
+
+</html>

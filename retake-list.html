@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>관리 필요</title>
+  <title>재수강 인원 조회</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.2/dist/umd/supabase.js"></script>
 </head>
@@ -23,15 +23,16 @@
 
     <section class="hero">
       <div class="hero-content">
-        <p class="hero-kicker">MANAGEMENT REQUIRED</p>
-        <h1>관리 학생 파악</h1>
-        <p>달성도 미달 학생을 확인할 수 있습니다.</p>
+        <p class="hero-kicker">RETAKE LIST</p>
+        <h1>재수강 인원 조회</h1>
+        <p>재수강을 진행한 학생의 성적·달성도 변화를 확인할 수 있습니다.</p>
       </div>
       <div class="hero-meta">
-        <h3>관리 기준</h3>
+        <h3>표시 형식</h3>
         <ul>
-          <li>달성도 '하'가 있는 학생</li>
-          <li>달성도 '중'이 있는 학생</li>
+          <li>이전 점수(이전 달성도) → 현재 점수(현재 달성도)</li>
+          <li>예: 5(하) → 9(상)</li>
+          <li>재수강이 없는 과목은 현재만 표시</li>
         </ul>
       </div>
     </section>
@@ -39,40 +40,19 @@
     <main class="content-grid">
       <section class="panel">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <h2 style="font-size: 18px; margin: 0;">달성도 '하'가 있는 학생</h2>
+          <h2 style="font-size: 18px; margin: 0;">재수강 학생 목록</h2>
           <label style="display: flex; align-items: center; gap: 8px;">
             레벨 선택:
-            <select id="low-level-select" name="lowLevel" style="width: 100px;">
+            <select id="retake-list-level" name="level" style="width: 100px;">
               <option value="l1">L1</option>
               <option value="l2">L2</option>
               <option value="l3">L3</option>
             </select>
           </label>
         </div>
-        <div class="status" id="low-status"></div>
-        <div class="table-container" style="max-height:50vh;">
-          <table id="low-achievement-table">
-            <thead></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </section>
-
-      <section class="panel">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <h2 style="font-size: 18px; margin: 0;">달성도 '중'이 있는 학생</h2>
-          <label style="display: flex; align-items: center; gap: 8px;">
-            레벨 선택:
-            <select id="mid-level-select" name="midLevel" style="width: 100px;">
-              <option value="l1">L1</option>
-              <option value="l2">L2</option>
-              <option value="l3">L3</option>
-            </select>
-          </label>
-        </div>
-        <div class="status" id="mid-status"></div>
-        <div class="table-container" style="max-height:50vh;">
-          <table id="mid-achievement-table">
+        <div class="status" id="retake-list-status"></div>
+        <div class="table-container" style="max-height: 60vh;">
+          <table id="retake-list-table">
             <thead></thead>
             <tbody></tbody>
           </table>
@@ -87,9 +67,8 @@
 
   <script src="config.js"></script>
   <script src="js/auth.js"></script>
-  <script src="js/manage.js"></script>
+  <script src="js/retake-list.js"></script>
   <script src="js/nav.js"></script>
 </body>
 
 </html>
-

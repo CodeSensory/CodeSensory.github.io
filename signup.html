@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>회원가입 - 간호학과 성적 관리</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.2/dist/umd/supabase.js"></script>
+</head>
+
+<body>
+  <div class="page-shell">
+    <header class="site-header auth-header">
+      <a href="view.html" id="logo-link" class="logo-link">
+        <div class="logo">
+          <span>국립강릉원주대학교</span>
+          <strong>간호학과 성적 관리</strong>
+        </div>
+      </a>
+    </header>
+
+    <section class="hero">
+      <div class="hero-content">
+        <p class="hero-kicker">SIGN UP</p>
+        <h1>회원가입</h1>
+        <p>아이디, 비밀번호, 이름, 직함을 입력하세요.</p>
+      </div>
+    </section>
+
+    <main class="content-grid">
+      <section class="panel auth-panel">
+        <form id="signup-form" class="auth-form">
+          <label>
+            아이디
+            <input type="text" id="signup-username" name="username" required autocomplete="username" placeholder="아이디" />
+          </label>
+          <label>
+            비밀번호
+            <input type="password" id="signup-password" name="password" required autocomplete="new-password" placeholder="비밀번호" minlength="6" />
+          </label>
+          <label>
+            비밀번호 확인
+            <input type="password" id="signup-password-confirm" name="password_confirm" required autocomplete="new-password" placeholder="비밀번호 확인" />
+          </label>
+          <label>
+            이름
+            <input type="text" id="signup-name" name="name" required placeholder="이름" />
+          </label>
+          <label>
+            직함
+            <input type="text" id="signup-title" name="title" placeholder="직함 (선택)" />
+          </label>
+          <div class="auth-form-actions">
+            <button type="submit" class="primary">가입하기</button>
+          </div>
+        </form>
+        <div class="auth-links">
+          <a href="login.html">로그인</a>
+          <a href="reset-request.html">비밀번호 초기화 요청</a>
+        </div>
+        <div class="status" id="signup-status"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      © 국립강릉원주대학교 간호학과 – 학사행정 전용 도구
+    </footer>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/notify-request.js"></script>
+  <script src="js/signup.js"></script>
+</body>
+
+</html>

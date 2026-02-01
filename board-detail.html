@@ -12,17 +12,13 @@
 <body>
   <div class="page-shell">
     <header class="site-header">
-      <div class="logo">
-        <span>국립강릉원주대학교</span>
-        <strong>간호학과 성적 관리</strong>
-      </div>
-      <nav class="global-nav">
-        <a href="input.html">성적 입력/관리</a>
-        <a href="view.html">성적 조회</a>
-        <a href="summary.html">성적 요약</a>
-        <a href="manage.html">관리 필요</a>
-        <a href="board.html">게시판</a>
-      </nav>
+      <a href="view.html" id="logo-link" class="logo-link">
+        <div class="logo">
+          <span>국립강릉원주대학교</span>
+          <strong>간호학과 성적 관리</strong>
+        </div>
+      </a>
+      <nav class="global-nav"></nav>
     </header>
 
     <section class="hero">
@@ -53,6 +49,10 @@
           </div>
           <div id="board-detail-body" style="min-height: 200px; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word;"></div>
         </article>
+        <nav class="board-detail-prev-next" aria-label="이전글 다음글" style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-color); display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+          <div id="board-prev-link" style="flex: 1; min-width: 0;"></div>
+          <div id="board-next-link" style="flex: 1; min-width: 0; text-align: right;"></div>
+        </nav>
       </section>
     </main>
 
@@ -62,7 +62,9 @@
   </div>
 
   <script src="config.js"></script>
+  <script src="js/auth.js"></script>
   <script src="js/board-detail.js"></script>
+  <script src="js/nav.js"></script>
 </body>
 
 </html>

@@ -13,17 +13,13 @@
 <body>
   <div class="page-shell">
     <header class="site-header">
-      <div class="logo">
-        <span>국립강릉원주대학교</span>
-        <strong>간호학과 성적 관리</strong>
-      </div>
-      <nav class="global-nav">
-        <a class="is-active" href="input.html">성적 입력/관리</a>
-        <a href="view.html">성적 조회</a>
-        <a href="summary.html">성적 요약</a>
-        <a href="manage.html">관리 필요</a>
-        <a href="board.html">게시판</a>
-      </nav>
+      <a href="view.html" id="logo-link" class="logo-link">
+        <div class="logo">
+          <span>국립강릉원주대학교</span>
+          <strong>간호학과 성적 관리</strong>
+        </div>
+      </a>
+      <nav class="global-nav"></nav>
     </header>
 
     <section class="hero">
@@ -108,7 +104,7 @@
 
         <div class="tab-content" id="excel-tab">
           <p>학번, 과목, 달성도 헤더를 가진 xlsx 파일을 업로드하세요.</p>
-          <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">예: 학번, 1_활력징후, 1_활력징후 달성도, 2_경구투약, 2_경구투약 달성도 형식으로 입력 가능합니다.</p>
+          <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px;">예: 학번, 1_활력징후, 2_경구투약 형식으로 입력 가능합니다.</p>
           <div style="margin-bottom: 16px;">
             <label>
               레벨 선택
@@ -163,7 +159,9 @@
   </div>
 
   <script src="config.js"></script>
+  <script src="js/auth.js"></script>
   <script src="js/input.js"></script>
+  <script src="js/nav.js"></script>
 </body>
 
 </html>

@@ -8,6 +8,24 @@ let selectedPostId = null;
 let isLoading = false;
 
 document.addEventListener('DOMContentLoaded', () => {
+  // 탭 전환: 페이지별 기능 안내 / 게시글 보기
+  const tabButtons = document.querySelectorAll('.board-tabs .tab-button');
+  const tabPanels = document.querySelectorAll('#board-tab-content-guide, #board-tab-content-posts');
+  tabButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const tab = btn.getAttribute('data-tab');
+      tabButtons.forEach((b) => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
+      tabPanels.forEach((p) => p.classList.remove('active'));
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
+      const targetPanel = document.getElementById('board-tab-content-' + tab);
+      if (targetPanel) targetPanel.classList.add('active');
+    });
+  });
+
   fetchBoardPosts();
 
   document.getElementById('board-search-btn').addEventListener('click', handleSearch);
@@ -58,7 +76,12 @@ async function fetchBoardPosts() {
 
     if (error) throw error;
 
-    boardPosts = data || [];
+    boardPosts = (data || []).sort((a, b) => {
+      const aPinned = a.is_pinned === true ? 1 : 0;
+      const bPinned = b.is_pinned === true ? 1 : 0;
+      if (bPinned !== aPinned) return bPinned - aPinned;
+      return new Date(b.created_at) - new Date(a.created_at);
+    });
     filteredPosts = [...boardPosts];
     currentPage = 1;
     renderBoardTable();
@@ -108,13 +131,19 @@ function renderBoardTable() {
   const startIndex = (currentPage - 1) * PAGE_SIZE;
   const paginatedRows = filteredPosts.slice(startIndex, startIndex + PAGE_SIZE);
 
+  // 오래된 글이 1번이 되도록: created_at 오름차순으로 1,2,3,... 부여 후 매핑
+  const byCreatedAsc = [...filteredPosts].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+  const postNumberMap = new Map();
+  byCreatedAsc.forEach((p, i) => postNumberMap.set(p.id, i + 1));
+
   tbody.innerHTML = paginatedRows
-    .map((post, idx) => {
-      const number = filteredPosts.length - (startIndex + idx);
+    .map((post) => {
+      const number = postNumberMap.get(post.id) ?? '-';
+      const noticeBadge = post.is_pinned === true ? '<span class="board-notice-badge">공지</span> ' : '';
       return `
-        <tr data-id="${post.id}">
+        <tr data-id="${post.id}" class="${post.is_pinned ? 'board-row-notice' : ''}">
           <td>${number}</td>
-          <td class="board-title-cell" style="cursor: pointer;">${post.title}</td>
+          <td class="board-title-cell" style="cursor: pointer;">${noticeBadge}${post.title}</td>
           <td>${post.author}</td>
           <td>${formatDate(post.created_at)}</td>
           <td>${post.views ?? 0}</td>

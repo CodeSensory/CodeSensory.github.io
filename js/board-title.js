@@ -1,9 +1,9 @@
 /**
- * 로그인 없이 게시판(announcements) 1번 글(id=1)의 제목만 가져와 표시.
+ * 로그인 없이 게시판(announcements) "1번 글" 제목만 가져와 표시.
+ * - 목록에서 첫 번째 = 최신 글(created_at 내림차순 1건)의 제목을 표시합니다.
  * 네비/메뉴에는 노출하지 않는 단독 페이지용.
  */
 (function () {
-  const POST_ID = 1;
   const BOARD_TABLE = 'announcements';
 
   async function loadFirstPostTitle() {
@@ -16,7 +16,8 @@
       const { data, error } = await supabase
         .from(BOARD_TABLE)
         .select('title')
-        .eq('id', POST_ID)
+        .order('created_at', { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       if (error) throw error;
@@ -25,7 +26,7 @@
         titleEl.textContent = data.title;
         titleEl.style.color = '';
       } else {
-        titleEl.textContent = '(1번 글이 없습니다.)';
+        titleEl.textContent = '(게시글이 없습니다.)';
         titleEl.style.color = 'var(--text-muted)';
       }
     } catch (err) {

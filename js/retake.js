@@ -1,7 +1,7 @@
 (function () {
   let currentStudentData = null; // 검색된 학생 원본 데이터 (student_grades row)
 
-  // 재수강 페이지 전용: 표시용 점수 (맨 앞 숫자만, 중첩 괄호 대응)
+  // 재시험 페이지 전용: 표시용 점수 (맨 앞 숫자만, 중첩 괄호 대응)
   function getDisplayScore(value) {
     if (value === null || value === undefined || value === '') return '-';
     const m = String(value).match(/^\d+(?:\.\d+)?/);
@@ -24,7 +24,7 @@
     return out;
   }
 
-  // 재수강 저장 시: 점수(수강 년도, 수강 과목, 이전 점수)
+  // 재시험 저장 시: 점수(수강 년도, 수강 과목, 이전 점수)
   function formatRetakeScore(score, year, subjectName, previousValue) {
     const prev = previousValue !== null && previousValue !== undefined && previousValue !== '' ? String(previousValue) : '';
     if (!prev) return `${score}(${year}, ${subjectName})`;
@@ -39,7 +39,7 @@
     return i > 0 ? s.slice(0, i) : s;
   }
 
-  // 재수강 저장 시: 새성취도(이전 성취도)
+  // 재시험 저장 시: 새성취도(이전 성취도)
   function formatRetakeAchievement(newAchievement, previousValue) {
     const prev = previousValue !== null && previousValue !== undefined && previousValue !== '' ? String(previousValue) : '';
     if (!prev) return newAchievement;

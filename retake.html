@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>재수강 성적 입력</title>
+  <title>재시험 성적 입력</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.2/dist/umd/supabase.js"></script>
 </head>
@@ -24,7 +24,7 @@
     <section class="hero">
       <div class="hero-content">
         <p class="hero-kicker">RETAKE GRADE</p>
-        <h1>재수강 성적 입력</h1>
+        <h1>재시험 성적 입력</h1>
         <p>학번 또는 이름을 입력한 뒤, 해당 학생이 있을 경우에만 레벨별 핵심술기 과목의 점수와 성취도를 수정할 수 있습니다.</p>
       </div>
       <div class="hero-meta">
@@ -33,7 +33,7 @@
           <li>학번 또는 이름으로 검색 후 해당 학생만 성적 수정 가능 (이름 중복 시 목록에서 선택)</li>
           <li>레벨(L1/L2/L3)별 과목 점수·성취도 표시</li>
           <li>과목 클릭 시 수강 년도·과목명·점수·성취도 입력</li>
-          <li>재수강 시 이전 점수/성취도가 기록됩니다</li>
+          <li>재시험 시 이전 점수/성취도가 기록됩니다</li>
         </ul>
       </div>
     </section>
@@ -114,10 +114,10 @@
       </div>
     </div>
 
-    <!-- 재수강 입력 모달 -->
+    <!-- 재시험 입력 모달 -->
     <div id="retake-modal" class="modal-overlay" style="display: none;">
       <div class="modal-content" style="max-width: 420px;">
-        <h3 style="margin-top: 0; margin-bottom: 16px;">재수강 성적 입력</h3>
+        <h3 style="margin-top: 0; margin-bottom: 16px;">재시험 성적 입력</h3>
         <form id="retake-edit-form">
           <input type="hidden" id="retake-modal-level" />
           <input type="hidden" id="retake-modal-subject-index" />

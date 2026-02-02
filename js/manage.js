@@ -3,7 +3,7 @@ let currentLowLevel = 'l1';
 let currentMidLevel = 'l1';
 let currentStudentIdPrefix = ''; // 학번 앞 4자리 필터 (빈 문자열 = 전체)
 
-// 재수강 형식(예: 중(하))에서 현재 달성도만 추출 — 괄호 앞까지, 없으면 전체
+// 재시험 형식(예: 중(하))에서 현재 달성도만 추출 — 괄호 앞까지, 없으면 전체
 function getDisplayAchievement(value) {
   if (value === null || value === undefined || value === '') return '';
   const s = String(value).trim();
@@ -80,7 +80,7 @@ function renderLowAchievementTable(rows) {
       const achievementKey = getAchievementKey(currentLowLevel, index);
       const achievement = row.rawData[achievementKey] || '-';
       const displayAch = getDisplayAchievement(achievement);
-      // 현재 달성도가 '하'인 경우(재수강 형식 '중(하)' 등 포함) 연한 주황색 배경
+      // 현재 달성도가 '하'인 경우(재시험 형식 '중(하)' 등 포함) 연한 주황색 배경
       const cellClass = displayAch === '하' ? 'low-achievement-cell' : '';
       return `<td class="${cellClass}">${achievement}</td>`;
     }).join('');
@@ -133,7 +133,7 @@ function renderMidAchievementTable(rows) {
       const achievementKey = getAchievementKey(currentMidLevel, index);
       const achievement = row.rawData[achievementKey] || '-';
       const displayAch = getDisplayAchievement(achievement);
-      // 현재 달성도가 '중' 또는 '하'인 경우(재수강 형식 포함) 연한 주황색 배경
+      // 현재 달성도가 '중' 또는 '하'인 경우(재시험 형식 포함) 연한 주황색 배경
       const cellClass = (displayAch === '중' || displayAch === '하') ? 'low-achievement-cell' : '';
       return `<td class="${cellClass}">${achievement}</td>`;
     }).join('');
@@ -171,7 +171,7 @@ function getStudentIdPrefixes(rows) {
 
 function filterLowAchievement(rows) {
   return rows.filter((row) => {
-    // 현재 레벨의 달성도에 '하'가 하나라도 있는지 확인 (재수강 형식 '중(하)' 등은 괄호 앞 기준)
+    // 현재 레벨의 달성도에 '하'가 하나라도 있는지 확인 (재시험 형식 '중(하)' 등은 괄호 앞 기준)
     return SUBJECTS.some((key, index) => {
       const achievementKey = getAchievementKey(currentLowLevel, index);
       const displayAch = getDisplayAchievement(row.rawData[achievementKey]);
@@ -182,7 +182,7 @@ function filterLowAchievement(rows) {
 
 function filterMidAchievement(rows) {
   return rows.filter((row) => {
-    // 현재 레벨의 달성도에 '중' 또는 '하'가 하나라도 있는지 확인 (재수강 형식 포함)
+    // 현재 레벨의 달성도에 '중' 또는 '하'가 하나라도 있는지 확인 (재시험 형식 포함)
     return SUBJECTS.some((key, index) => {
       const achievementKey = getAchievementKey(currentMidLevel, index);
       const displayAch = getDisplayAchievement(row.rawData[achievementKey]);

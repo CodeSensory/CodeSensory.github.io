@@ -8,8 +8,8 @@
     { id: 'view', href: 'view.html', label: '성적 조회' },
     { id: 'summary', href: 'summary.html', label: '성적 요약' },
     { id: 'manage', href: 'manage.html', label: '관리 필요' },
-    { id: 'retake', href: 'retake.html', label: '재수강 성적 입력' },
-    { id: 'retake-list', href: 'retake-list.html', label: '재수강 인원 조회' },
+    { id: 'retake', href: 'retake.html', label: '재시험 성적 입력' },
+    { id: 'retake-list', href: 'retake-list.html', label: '재시험 인원 조회' },
     { id: 'board', href: 'board.html', label: '게시판' },
     { id: 'signup-requests', href: 'signup-requests.html', label: '가입 요청 관리', adminOnly: true }
   ];

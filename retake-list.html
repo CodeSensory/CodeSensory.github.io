@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>재수강 인원 조회</title>
+  <title>재시험 인원 조회</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.2/dist/umd/supabase.js"></script>
 </head>
@@ -24,15 +24,15 @@
     <section class="hero">
       <div class="hero-content">
         <p class="hero-kicker">RETAKE LIST</p>
-        <h1>재수강 인원 조회</h1>
-        <p>재수강을 진행한 학생의 성적·달성도 변화를 확인할 수 있습니다.</p>
+        <h1>재시험 인원 조회</h1>
+        <p>재시험을 진행한 학생의 성적·달성도 변화를 확인할 수 있습니다.</p>
       </div>
       <div class="hero-meta">
         <h3>표시 형식</h3>
         <ul>
           <li>이전 점수(이전 달성도) → 현재 점수(현재 달성도)</li>
           <li>예: 5(하) → 9(상)</li>
-          <li>재수강이 없는 과목은 현재만 표시</li>
+          <li>재시험이 없는 과목은 현재만 표시</li>
         </ul>
       </div>
     </section>
@@ -40,7 +40,7 @@
     <main class="content-grid">
       <section class="panel">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <h2 style="font-size: 18px; margin: 0;">재수강 학생 목록</h2>
+          <h2 style="font-size: 18px; margin: 0;">재시험 학생 목록</h2>
           <label style="display: flex; align-items: center; gap: 8px;">
             레벨 선택:
             <select id="retake-list-level" name="level" style="width: 100px;">

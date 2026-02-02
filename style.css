@@ -356,6 +356,32 @@ button.secondary:hover {
   color: var(--mclaren-orange);
 }
 
+/* 링크를 primary 버튼처럼 보이게 (엑셀 템플릿 다운로드 등) */
+a.primary {
+  display: inline-block;
+  box-sizing: border-box;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 28px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--mclaren-orange), var(--mclaren-orange-light));
+  box-shadow: 0 4px 20px rgba(255, 128, 0, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+a.primary:hover {
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(255, 128, 0, 0.6);
+}
+
 table {
   width: 100%;
   min-width: 100%;
@@ -1077,13 +1103,13 @@ td.low-achievement-cell {
   }
 }
 
-/* 성적 조회: 재수강 점수 표시 (빨간색) */
+/* 성적 조회: 재시험 점수 표시 (빨간색) */
 .retake-score {
   color: #c00;
   font-weight: 600;
 }
 
-/* 재수강 모달 */
+/* 재시험 모달 */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -1108,7 +1134,7 @@ td.low-achievement-cell {
   background: var(--bg-tertiary);
 }
 
-/* 재수강 인원 조회: 현재 점수/달성도(예: 9(상)) 빨간색 */
+/* 재시험 인원 조회: 현재 점수/달성도(예: 9(상)) 빨간색 */
 .retake-list-current {
   color: #c00;
   font-weight: 600;

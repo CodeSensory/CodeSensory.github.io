@@ -1,11 +1,11 @@
 /**
- * 재수강 인원 조회: 재수강한 학생만 표시, 각 과목 셀에 "5(하) -> 9(상)" 형식으로 표시
+ * 재시험 인원 조회: 재시험한 학생만 표시, 각 과목 셀에 "5(하) -> 9(상)" 형식으로 표시
  */
 (function () {
   let allRows = [];
   let currentLevel = 'l1';
 
-  // 재수강 점수 여부 (괄호 안에 쉼표 2개 이상)
+  // 재시험 점수 여부 (괄호 안에 쉼표 2개 이상)
   function isRetakeScore(value) {
     if (value === null || value === undefined || value === '') return false;
     const s = String(value).trim();
@@ -19,7 +19,7 @@
     return m ? m[0] : '';
   }
 
-  // 이전 점수 (재수강 형식일 때 괄호 안 세 번째 부분의 맨 앞 숫자)
+  // 이전 점수 (재시험 형식일 때 괄호 안 세 번째 부분의 맨 앞 숫자)
   function getPreviousScore(value) {
     if (!value || !isRetakeScore(value)) return '';
     const s = String(value).trim();
@@ -50,7 +50,7 @@
     return inner || '';
   }
 
-  // 재수강 여부 (달성도가 "새(이전)" 형식)
+  // 재시험 여부 (달성도가 "새(이전)" 형식)
   function isRetakeAchievement(value) {
     if (value === null || value === undefined || value === '') return false;
     return String(value).indexOf('(') > 0;
@@ -79,7 +79,7 @@
     return currStr;
   }
 
-  // 해당 레벨에서 재수강 이력이 하나라도 있는지
+  // 해당 레벨에서 재시험 이력이 하나라도 있는지
   function hasRetakeInLevel(rawData, level) {
     for (let idx = 0; idx < SUBJECTS.length; idx++) {
       const scoreKey = getSubjectKey(level, idx);
@@ -110,7 +110,7 @@
 
     if (!rows || rows.length === 0) {
       tbody.innerHTML =
-        '<tr><td colspan="20" style="text-align: center; padding: 20px; color: var(--text-muted);">재수강 이력이 있는 학생이 없습니다. (레벨: ' +
+        '<tr><td colspan="20" style="text-align: center; padding: 20px; color: var(--text-muted);">재시험 이력이 있는 학생이 없습니다. (레벨: ' +
         currentLevel.toUpperCase() +
         ')</td></tr>';
       statusEl.textContent = '0건';

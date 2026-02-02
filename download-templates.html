@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>엑셀 템플릿 다운로드</title>
   <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
   <div class="page-shell">
@@ -22,54 +21,18 @@
       <section class="panel">
         <h1 style="margin-top: 0;">엑셀 템플릿 다운로드</h1>
         <p style="color: var(--text-secondary); margin-bottom: 24px;">아래 버튼을 클릭하면 해당 용도의 엑셀 템플릿 파일이 다운로드됩니다. 성적 입력/관리 페이지의 엑셀 업로드에서 사용하세요.</p>
-        <div style="display: flex; flex-direction: column; gap: 16px; max-width: 400px;">
-          <button type="button" class="primary" id="download-grade-btn" style="padding: 14px 20px; font-size: 16px;">핵심술기 성적 업로드용.xlsx 다운로드</button>
-          <button type="button" class="primary" id="download-year-btn" style="padding: 14px 20px; font-size: 16px;">졸업 연도 업로드용.xlsx 다운로드</button>
+        <div class="download-template-buttons" style="display: flex; flex-direction: column; gap: 16px; max-width: 400px;">
+          <a href="핵심술기%20성적%20업로드용.xlsx" download="핵심술기 성적 업로드용.xlsx" class="primary">핵심술기 성적 업로드용.xlsx 다운로드</a>
+          <a href="졸업%20연도%20업로드용.xlsx" download="졸업 연도 업로드용.xlsx" class="primary">졸업 연도 업로드용.xlsx 다운로드</a>
         </div>
         <p style="margin-top: 24px; color: var(--text-muted); font-size: 14px;">
-          <strong>핵심술기 성적 업로드용</strong>: 학번, 졸업연도, 1_활력징후 ~ 18_배액관 관리 열을 포함합니다. 성적 입력/관리 > 엑셀 업로드 탭에서 레벨(L1/L2/L3)을 선택한 뒤 업로드하세요.<br />
+          <strong>핵심술기 성적 업로드용</strong>: 학번, 이름, 졸업연도, 1_활력징후 ~ 18_배액관 관리 열을 포함합니다. 성적 입력/관리 > 엑셀 업로드 탭에서 레벨(L1/L2/L3)을 선택한 뒤 업로드하세요.<br />
           <strong>졸업 연도 업로드용</strong>: 학번, 졸업연도 열만 포함합니다. 엑셀 업로드 탭에서 "졸업 연도"를 선택한 뒤 업로드하세요.
         </p>
       </section>
     </main>
     <footer class="site-footer">© 국립강릉원주대학교 간호학과 – 학사행정 전용 도구</footer>
   </div>
-  <script>
-(function () {
-  var SUBJECT_NAMES = {
-    1: '1_활력징후', 2: '2_경구투약', 3: '3_근육주사', 4: '4_피하주사', 5: '5_피내주사',
-    6: '6_정맥수액주입', 7: '7_수혈요법', 8: '8_간헐적 위관영양', 9: '9_단순도뇨',
-    10: '10_유치도뇨', 11: '11_배출관장', 12: '12_말초산소포화도 심전도', 13: '13_비강캐뉼라',
-    14: '14_흡인', 15: '15_기본 심폐소생술, 제세동기 적용', 16: '16_통증관리', 17: '17_욕창관리 및 낙상예방간호', 18: '18_배액관 관리'
-  };
-  function getSubjectName(n) { return SUBJECT_NAMES[n] || '과목' + n; }
-
-  function downloadGradeTemplate() {
-    var headers = ['학번', '이름', '졸업연도'];
-    for (var i = 1; i <= 18; i++) headers.push(getSubjectName(i));
-    var row1 = headers.slice();
-    var row2 = ['예시', '홍길동', '2025'];
-    for (var j = 0; j < 18; j++) row2.push('');
-    var ws = XLSX.utils.aoa_to_sheet([row1, row2]);
-    var wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, '성적');
-    XLSX.writeFile(wb, '핵심술기 성적 업로드용.xlsx');
-  }
-
-  function downloadYearTemplate() {
-    var ws = XLSX.utils.aoa_to_sheet([
-      ['학번', '졸업연도'],
-      ['예시', '2025']
-    ]);
-    var wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, '졸업연도');
-    XLSX.writeFile(wb, '졸업 연도 업로드용.xlsx');
-  }
-
-  document.getElementById('download-grade-btn').addEventListener('click', downloadGradeTemplate);
-  document.getElementById('download-year-btn').addEventListener('click', downloadYearTemplate);
-})();
-  </script>
   <script src="js/auth.js"></script>
   <script src="js/nav.js"></script>
 </body>

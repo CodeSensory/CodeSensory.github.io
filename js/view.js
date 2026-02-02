@@ -5,7 +5,7 @@ let allGradeData = []; // 원본 데이터 보관 (달성도 포함)
 let selectedRowForEdit = null; // 수정할 행 데이터
 let currentLevel = 'l1'; // 현재 선택된 레벨
 
-// 성적에서 점수만 추출 ("점수(연도, 과목명)" 또는 재수강 "점수(연도, 과목, 이전점수)" 형식에서 맨 앞 점수만 반환)
+// 성적에서 점수만 추출 ("점수(연도, 과목명)" 또는 재시험 "점수(연도, 과목, 이전점수)" 형식에서 맨 앞 점수만 반환)
 function extractScore(value) {
   if (value === null || value === undefined || value === '') {
     return '-';
@@ -18,7 +18,7 @@ function extractScore(value) {
   return strValue;
 }
 
-// 재수강 점수 여부 (점수(수강 년도, 수강 과목, 이전 점수) 형식 → 괄호 안에 쉼표가 2개 이상)
+// 재시험 점수 여부 (점수(수강 년도, 수강 과목, 이전 점수) 형식 → 괄호 안에 쉼표가 2개 이상)
 function isRetakeScore(value) {
   if (value === null || value === undefined || value === '') return false;
   const s = String(value).trim();
@@ -26,7 +26,7 @@ function isRetakeScore(value) {
   return (s.match(/,/g) || []).length >= 2;
 }
 
-// 점수 표시 HTML (재수강이면 빨간색 클래스 적용)
+// 점수 표시 HTML (재시험이면 빨간색 클래스 적용)
 function scoreCellHtml(rawValue, displayValue) {
   const text = displayValue !== undefined && displayValue !== '' ? displayValue : '-';
   if (isRetakeScore(rawValue)) {
@@ -296,7 +296,7 @@ function renderSearchResultTable(rows) {
         return '';
       }
       
-      // 모든 레벨의 성적을 3열로 표시 (점수, 재수강은 빨간색)
+      // 모든 레벨의 성적을 3열로 표시 (점수, 재시험은 빨간색)
       const subjectScoreCells = subjectIndices
         .map((idx) => {
           const l1Key = getSubjectKey('l1', idx);
@@ -392,7 +392,7 @@ function renderTableBody(rows) {
 
   tbody.innerHTML = rows
     .map((row) => {
-      // 현재 레벨의 성적 표시 (점수만 표시, 재수강은 빨간색)
+      // 현재 레벨의 성적 표시 (점수만 표시, 재시험은 빨간색)
       const subjectCells = subjectIndices
         .map((idx) => {
           const levelSubjectKey = getSubjectKey(currentLevel, idx);

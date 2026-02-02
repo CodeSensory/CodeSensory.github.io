@@ -1,6 +1,7 @@
 let allRows = [];
 let currentLowLevel = 'l1';
 let currentMidLevel = 'l1';
+let currentStudentIdPrefix = ''; // 학번 앞 4자리 필터 (빈 문자열 = 전체)
 
 // 재수강 형식(예: 중(하))에서 현재 달성도만 추출 — 괄호 앞까지, 없으면 전체
 function getDisplayAchievement(value) {
@@ -18,15 +19,26 @@ document.addEventListener('DOMContentLoaded', () => {
   // 레벨 선택 변경 이벤트
   document.getElementById('low-level-select').addEventListener('change', (e) => {
     currentLowLevel = e.target.value;
-    const filtered = filterLowAchievement(allRows);
+    const filtered = filterLowAchievement(filterByPrefix(allRows));
     renderLowAchievementTable(filtered);
   });
   
   document.getElementById('mid-level-select').addEventListener('change', (e) => {
     currentMidLevel = e.target.value;
-    const filtered = filterMidAchievement(allRows);
+    const filtered = filterMidAchievement(filterByPrefix(allRows));
     renderMidAchievementTable(filtered);
   });
+
+  const prefixSelect = document.getElementById('manage-student-id-prefix');
+  if (prefixSelect) {
+    prefixSelect.addEventListener('change', (e) => {
+      currentStudentIdPrefix = e.target.value || '';
+      const lowFiltered = filterLowAchievement(filterByPrefix(allRows));
+      const midFiltered = filterMidAchievement(filterByPrefix(allRows));
+      renderLowAchievementTable(lowFiltered);
+      renderMidAchievementTable(midFiltered);
+    });
+  }
   
   // 데이터 로드
   fetchAllRows();
@@ -46,12 +58,13 @@ function renderLowAchievementTable(rows) {
   thead.innerHTML = `
     <tr>
       <th>학번</th>
+      <th>이름</th>
       ${SUBJECTS.map((key, index) => `<th>${getSubjectName(index + 1)}</th>`).join('')}
     </tr>
   `;
   
   if (!rows || rows.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="19" style="text-align: center; padding: 20px; color: var(--text-muted);">달성도 '하'가 있는 학생이 없습니다. (레벨: ${currentLowLevel})</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="20" style="text-align: center; padding: 20px; color: var(--text-muted);">달성도 '하'가 있는 학생이 없습니다. (레벨: ${currentLowLevel})</td></tr>`;
     statusEl.textContent = '0건';
     return;
   }
@@ -75,6 +88,7 @@ function renderLowAchievementTable(rows) {
     return `
       <tr>
         <td>${row.student_id || '-'}</td>
+        <td>${(row.rawData && row.rawData.student_name) ? row.rawData.student_name : '-'}</td>
         ${achievementCells}
       </tr>
     `;
@@ -97,12 +111,13 @@ function renderMidAchievementTable(rows) {
   thead.innerHTML = `
     <tr>
       <th>학번</th>
+      <th>이름</th>
       ${SUBJECTS.map((key, index) => `<th>${getSubjectName(index + 1)}</th>`).join('')}
     </tr>
   `;
   
   if (!rows || rows.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="19" style="text-align: center; padding: 20px; color: var(--text-muted);">달성도 '중'이 있는 학생이 없습니다. (레벨: ${currentMidLevel})</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="20" style="text-align: center; padding: 20px; color: var(--text-muted);">달성도 '중'이 있는 학생이 없습니다. (레벨: ${currentMidLevel})</td></tr>`;
     statusEl.textContent = '0건';
     return;
   }
@@ -126,12 +141,32 @@ function renderMidAchievementTable(rows) {
     return `
       <tr>
         <td>${row.student_id || '-'}</td>
+        <td>${(row.rawData && row.rawData.student_name) ? row.rawData.student_name : '-'}</td>
         ${achievementCells}
       </tr>
     `;
   }).join('');
   
   statusEl.textContent = `${rows.length}건 (레벨: ${currentMidLevel})`;
+}
+
+// 학번 앞 4자리로 필터 (빈 문자열이면 전체)
+function filterByPrefix(rows) {
+  if (!currentStudentIdPrefix) return rows;
+  return rows.filter((row) => {
+    const sid = String(row.student_id || '').trim();
+    return sid.slice(0, 4) === currentStudentIdPrefix;
+  });
+}
+
+// 데이터에서 학번 앞 4자리 목록 추출 (드롭다운용)
+function getStudentIdPrefixes(rows) {
+  const set = new Set();
+  (rows || []).forEach((row) => {
+    const sid = String(row.student_id || '').trim();
+    if (sid.length >= 4) set.add(sid.slice(0, 4));
+  });
+  return Array.from(set).sort();
 }
 
 function filterLowAchievement(rows) {
@@ -199,16 +234,26 @@ async function fetchAllRows() {
         rawData: row, // 원본 데이터 보관 (모든 레벨의 달성도 포함)
       };
     });
+
+    // 학번 앞 4자리 드롭다운 옵션 채우기
+    const prefixSelect = document.getElementById('manage-student-id-prefix');
+    if (prefixSelect) {
+      const prefixes = getStudentIdPrefixes(allRows);
+      const currentValue = prefixSelect.value || '';
+      prefixSelect.innerHTML = '<option value="">전체</option>' + prefixes.map((p) => '<option value="' + p + '">' + p + '</option>').join('');
+      if (prefixes.indexOf(currentValue) !== -1) prefixSelect.value = currentValue;
+      else currentStudentIdPrefix = '';
+    }
     
     console.log(`정규화된 데이터: ${allRows.length}건`);
     
-    // 달성도 '하'가 있는 학생 필터링 (현재 레벨 기준)
-    const lowAchievementRows = filterLowAchievement(allRows);
+    // 달성도 '하'가 있는 학생 필터링 (학번 앞 4자리 + 현재 레벨 기준)
+    const lowAchievementRows = filterLowAchievement(filterByPrefix(allRows));
     console.log(`달성도 '하'가 있는 학생: ${lowAchievementRows.length}건 (레벨: ${currentLowLevel})`);
     renderLowAchievementTable(lowAchievementRows);
     
-    // 달성도 '중'이 있는 학생 필터링 (현재 레벨 기준)
-    const midAchievementRows = filterMidAchievement(allRows);
+    // 달성도 '중'이 있는 학생 필터링 (학번 앞 4자리 + 현재 레벨 기준)
+    const midAchievementRows = filterMidAchievement(filterByPrefix(allRows));
     console.log(`달성도 '중'이 있는 학생: ${midAchievementRows.length}건 (레벨: ${currentMidLevel})`);
     renderMidAchievementTable(midAchievementRows);
     

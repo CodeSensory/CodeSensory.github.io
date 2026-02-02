@@ -30,7 +30,7 @@
       <div class="hero-meta">
         <h3>조회 옵션</h3>
         <ul>
-          <li>학번 실시간 검색</li>
+          <li>학번 또는 이름으로 검색</li>
           <li>최신 데이터 자동 불러오기</li>
           <li>과목별 점수 열 고정</li>
         </ul>
@@ -40,7 +40,7 @@
     <main class="content-grid">
       <section class="panel">
         <div class="toolbar">
-          <input type="text" id="search-student" placeholder="학번으로 검색" />
+          <input type="text" id="search-student" placeholder="학번 또는 이름으로 검색" />
           <button class="primary" id="search-btn" type="button">검색</button>
           <button class="secondary" id="refresh-btn" type="button">새로고침</button>
         </div>
@@ -59,9 +59,13 @@
           <h2 style="margin-top: 0; margin-bottom: 20px; color: var(--mclaren-orange);">성적 수정</h2>
           <form id="edit-grade-form">
             <div style="background: var(--bg-primary); padding: 16px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border-color);">
-              <label style="display: flex; align-items: center; gap: 12px; margin-bottom: 0;">
+              <label style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
                 <span style="font-weight: 600; min-width: 60px;">학번</span>
                 <input type="text" id="edit-student-id" readonly style="flex: 1; max-width: 200px;" />
+              </label>
+              <label style="display: flex; align-items: center; gap: 12px; margin-bottom: 0;">
+                <span style="font-weight: 600; min-width: 60px;">이름</span>
+                <input type="text" id="edit-student-name" maxlength="100" placeholder="이름" style="flex: 1; max-width: 200px;" />
               </label>
             </div>
             

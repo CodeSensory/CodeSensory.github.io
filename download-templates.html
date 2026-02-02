@@ -40,15 +40,15 @@
     1: '1_활력징후', 2: '2_경구투약', 3: '3_근육주사', 4: '4_피하주사', 5: '5_피내주사',
     6: '6_정맥수액주입', 7: '7_수혈요법', 8: '8_간헐적 위관영양', 9: '9_단순도뇨',
     10: '10_유치도뇨', 11: '11_배출관장', 12: '12_말초산소포화도 심전도', 13: '13_비강캐뉼라',
-    14: '14_입원관리', 15: '15_격리실출입', 16: '16_통증관리', 17: '17_욕창관리 및 낙상예방간호', 18: '18_배액관 관리'
+    14: '14_흡인', 15: '15_기본 심폐소생술, 제세동기 적용', 16: '16_통증관리', 17: '17_욕창관리 및 낙상예방간호', 18: '18_배액관 관리'
   };
   function getSubjectName(n) { return SUBJECT_NAMES[n] || '과목' + n; }
 
   function downloadGradeTemplate() {
-    var headers = ['학번', '졸업연도'];
+    var headers = ['학번', '이름', '졸업연도'];
     for (var i = 1; i <= 18; i++) headers.push(getSubjectName(i));
     var row1 = headers.slice();
-    var row2 = ['예시', '2025'];
+    var row2 = ['예시', '홍길동', '2025'];
     for (var j = 0; j < 18; j++) row2.push('');
     var ws = XLSX.utils.aoa_to_sheet([row1, row2]);
     var wb = XLSX.utils.book_new();

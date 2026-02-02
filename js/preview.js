@@ -491,6 +491,7 @@ function renderPreviewTable() {
     <tr>
       <th style="width: 80px;">수정</th>
       <th>학번</th>
+      <th>이름</th>
       ${sortedSubjectKeys.map(key => {
         const num = parseInt(key.replace('subject_', ''));
         const subjectName = getSubjectName(num);
@@ -553,12 +554,14 @@ function renderPreviewTable() {
       return `<td>${displayScore}</td><td>${displayAchievement}</td>`;
     }).join('');
     
+    const nameDisplay = (row.student_name != null && row.student_name !== '') ? row.student_name : '-';
     return `
       <tr class="${rowClass}" data-row-index="${index}">
         <td>
           <button class="secondary" type="button" onclick="editRow(${index})" style="padding: 4px 8px; font-size: 12px;">수정</button>
         </td>
         <td>${studentId}</td>
+        <td>${nameDisplay}</td>
         ${subjectCells}
       </tr>
     `;
@@ -640,6 +643,7 @@ function showFinalPreview() {
   thead.innerHTML = `
     <tr>
       <th>학번</th>
+      <th>이름</th>
       ${sortedSubjectKeys.map(key => {
         const num = parseInt(key.replace('subject_', ''));
         const subjectName = getSubjectName(num);
@@ -664,9 +668,11 @@ function showFinalPreview() {
       return `<td>${displayScore}</td><td>${achievementValue}</td>`;
     }).join('');
     
+    const nameDisplay = (row.student_name != null && row.student_name !== '') ? row.student_name : '-';
     return `
       <tr>
         <td>${studentId}</td>
+        <td>${nameDisplay}</td>
         ${subjectCells}
       </tr>
     `;
@@ -797,6 +803,11 @@ async function performSave() {
         const updatePayload = {};
         let hasUpdateData = false;
         
+        // 이름 업데이트 (있으면)
+        if (row.student_name !== undefined && row.student_name !== null) {
+          updatePayload.student_name = String(row.student_name).trim() || null;
+          hasUpdateData = true;
+        }
         // 졸업연도만 업데이트하는 경우
         if (savedLevel === 'graduate_year') {
           if (row.graduate_year !== undefined && row.graduate_year !== null && row.graduate_year !== '') {
@@ -856,6 +867,12 @@ async function performSave() {
         const newPayload = {
           student_id: studentId,
         };
+        
+        if (row.student_name !== undefined && row.student_name !== null && String(row.student_name).trim() !== '') {
+          newPayload.student_name = String(row.student_name).trim();
+        } else {
+          newPayload.student_name = null;
+        }
         
         // 졸업연도만 업데이트하는 경우
         if (savedLevel === 'graduate_year') {

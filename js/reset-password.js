@@ -91,12 +91,17 @@ document.addEventListener('DOMContentLoaded', () => {
       const salt = Auth.generateSalt();
       const password_hash = await Auth.hashPassword(newPassword, salt);
 
-      const { error: updateUserError } = await supabase
+      // .select()로 실제로 갱신된 행이 있는지 확인 (0건이면 DB에 반영 안 됨)
+      const { data: updatedRows, error: updateUserError } = await supabase
         .from(USERS_TABLE)
         .update({ password_hash, salt })
-        .eq('username', pendingUsername);
+        .eq('username', pendingUsername)
+        .select('id');
 
       if (updateUserError) throw updateUserError;
+      if (!updatedRows || updatedRows.length === 0) {
+        throw new Error('해당 아이디의 사용자를 찾을 수 없어 비밀번호를 저장하지 못했습니다. 가입 요청이 승인된 계정인지 확인해 주세요.');
+      }
 
       const { error: updateResetError } = await supabase
         .from(RESET_TABLE)

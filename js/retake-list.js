@@ -102,7 +102,7 @@
     if (!thead || !tbody || !statusEl) return;
 
     thead.innerHTML =
-      '<tr><th>학번</th>' +
+      '<tr><th>학번</th><th>이름</th>' +
       SUBJECTS.map(function (_, index) {
         return '<th>' + getSubjectName(index + 1) + '</th>';
       }).join('') +
@@ -110,7 +110,7 @@
 
     if (!rows || rows.length === 0) {
       tbody.innerHTML =
-        '<tr><td colspan="19" style="text-align: center; padding: 20px; color: var(--text-muted);">재수강 이력이 있는 학생이 없습니다. (레벨: ' +
+        '<tr><td colspan="20" style="text-align: center; padding: 20px; color: var(--text-muted);">재수강 이력이 있는 학생이 없습니다. (레벨: ' +
         currentLevel.toUpperCase() +
         ')</td></tr>';
       statusEl.textContent = '0건';
@@ -120,13 +120,14 @@
     tbody.innerHTML = rows
       .map(function (row) {
         const raw = row.rawData;
+        const nameDisplay = raw && raw.student_name ? raw.student_name : '-';
         const cells = SUBJECTS.map(function (_, index) {
           const scoreKey = getSubjectKey(currentLevel, index);
           const achKey = getAchievementKey(currentLevel, index);
           const text = formatCell(raw[scoreKey], raw[achKey]);
           return '<td class="retake-list-cell">' + text + '</td>';
         }).join('');
-        return '<tr><td>' + (row.student_id || '-') + '</td>' + cells + '</tr>';
+        return '<tr><td>' + (row.student_id || '-') + '</td><td>' + nameDisplay + '</td>' + cells + '</tr>';
       })
       .join('');
     statusEl.textContent = rows.length + '건 (레벨: ' + currentLevel.toUpperCase() + ')';

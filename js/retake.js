@@ -61,6 +61,10 @@
       const achievementKey = getAchievementKey(level, index);
       const scoreVal = rawData[subjectKey];
       const achievementVal = rawData[achievementKey];
+      // 점수 값이 없는 과목은 표시하지 않음 (수정 불가)
+      if (scoreVal === null || scoreVal === undefined || String(scoreVal).trim() === '') {
+        return '';
+      }
       const scoreDisplay = getDisplayScore(scoreVal);
       const achievementDisplay = getDisplayAchievement(achievementVal);
       const subjectName = getSubjectName(index + 1);
@@ -79,7 +83,7 @@
     const section = document.getElementById('retake-result-section');
     const label = document.getElementById('retake-student-id-label');
     if (section) section.style.display = 'block';
-    if (label) label.textContent = studentId;
+    if (label) label.textContent = rawData.student_name ? `${studentId}(${rawData.student_name})` : studentId;
     LEVELS.forEach(level => renderLevelTable(level, rawData));
 
     document.querySelectorAll('.retake-row').forEach((row) => {
@@ -120,29 +124,92 @@
     document.getElementById('retake-modal').style.display = 'none';
   }
 
+  let pendingNameMatches = []; // 이름 검색 시 여러 명일 때 목록
+
+  function showSelectStudentModal(matches) {
+    pendingNameMatches = matches;
+    const modal = document.getElementById('retake-select-student-modal');
+    const listEl = document.getElementById('retake-select-student-list');
+    if (!modal || !listEl) return;
+    listEl.innerHTML = matches
+      .map(function (row, index) {
+        const name = row.student_name || '-';
+        const sid = row.student_id || '-';
+        return (
+          '<li data-index="' +
+          index +
+          '" style="padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 8px; cursor: pointer; background: var(--bg-secondary);">' +
+          '<strong>' + (name || '-') + '</strong> ' +
+          '<span style="color: var(--text-muted);">' + sid + '</span>' +
+          '</li>'
+        );
+      })
+      .join('');
+    listEl.querySelectorAll('li').forEach(function (li) {
+      li.addEventListener('click', function () {
+        const idx = parseInt(li.getAttribute('data-index'), 10);
+        const row = pendingNameMatches[idx];
+        if (row) {
+          document.getElementById('retake-select-student-modal').style.display = 'none';
+          showResultSection(row.student_id, row);
+          setStatus('학생을 찾았습니다. 수정할 과목을 클릭하세요.');
+        }
+      });
+    });
+    modal.style.display = 'flex';
+  }
+
+  function hideSelectStudentModal() {
+    const modal = document.getElementById('retake-select-student-modal');
+    if (modal) modal.style.display = 'none';
+    pendingNameMatches = [];
+  }
+
   async function searchStudent() {
     const input = document.getElementById('retake-search-student');
     const keyword = (input && input.value.trim()) || '';
     if (!keyword) {
-      setStatus('학번을 입력하세요.', true);
+      setStatus('학번 또는 이름을 입력하세요.', true);
       hideResultSection();
+      hideSelectStudentModal();
       return;
     }
     setStatus('검색 중...');
     hideResultSection();
+    hideSelectStudentModal();
     try {
-      const { data, error } = await supabase
+      // 1) 학번으로 정확히 검색
+      const { data: byId, error: errId } = await supabase
         .from('student_grades')
         .select('*')
         .eq('student_id', keyword)
         .maybeSingle();
-      if (error) throw error;
-      if (data) {
-        showResultSection(keyword, data);
+      if (errId) throw errId;
+      if (byId) {
+        showResultSection(keyword, byId);
         setStatus('학생을 찾았습니다. 수정할 과목을 클릭하세요.');
-      } else {
-        setStatus('해당 학번의 학생이 없습니다. 학번을 확인하세요.', true);
+        return;
       }
+      // 2) 이름으로 검색 (포함)
+      const { data: byName, error: errName } = await supabase
+        .from('student_grades')
+        .select('*')
+        .ilike('student_name', '%' + keyword + '%')
+        .order('student_id', { ascending: true });
+      if (errName) throw errName;
+      const list = byName || [];
+      if (list.length === 0) {
+        setStatus('해당하는 학생이 없습니다. 학번 또는 이름을 확인하세요.', true);
+        return;
+      }
+      if (list.length === 1) {
+        showResultSection(list[0].student_id, list[0]);
+        setStatus('학생을 찾았습니다. 수정할 과목을 클릭하세요.');
+        return;
+      }
+      // 3) 동일 이름 여러 명 → 선택 팝업
+      showSelectStudentModal(list);
+      setStatus('동일한 이름의 학생이 여러 명 있습니다. 목록에서 선택하세요.');
     } catch (e) {
       console.error(e);
       setStatus('검색 중 오류가 발생했습니다.', true);
@@ -226,5 +293,9 @@
     if (searchInput) searchInput.addEventListener('keypress', function (e) { if (e.key === 'Enter') searchStudent(); });
     document.getElementById('retake-modal-cancel').addEventListener('click', closeModal);
     document.getElementById('retake-edit-form').addEventListener('submit', saveRetakeEdit);
+    var selectModal = document.getElementById('retake-select-student-modal');
+    var selectCancel = document.getElementById('retake-select-student-cancel');
+    if (selectCancel) selectCancel.addEventListener('click', hideSelectStudentModal);
+    if (selectModal) selectModal.addEventListener('click', function (e) { if (e.target === selectModal) hideSelectStudentModal(); });
   });
 })();

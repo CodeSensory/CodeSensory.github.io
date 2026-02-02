@@ -212,6 +212,7 @@ function renderTableHeader() {
   });
   headerRow.innerHTML = `
     <th>학번</th>
+    <th>이름</th>
     ${selectedSubjectsArray.map((key) => `<th>${getSubjectName(SUBJECTS.indexOf(key) + 1)}</th>`).join('')}
     <th>비고</th>
     <th>수정일</th>
@@ -240,6 +241,7 @@ function renderSearchResultTableHeader() {
   headerRow.innerHTML = `
     <th rowspan="2">수정</th>
     <th rowspan="2">학번</th>
+    <th rowspan="2">이름</th>
     ${subjectHeaders}
     <th rowspan="2">비고</th>
     <th rowspan="2">수정일</th>
@@ -272,7 +274,7 @@ function renderSearchResultTable(rows) {
   }
   
   if (!rows || rows.length === 0) {
-    const colCount = selectedSubjects.size * 3 + 4; // L1, L2, L3 각각 + 수정 버튼, 학번, 비고, 수정일 포함
+    const colCount = selectedSubjects.size * 3 + 5; // L1, L2, L3 각각 + 수정 버튼, 학번, 이름, 비고, 수정일 포함
     tbody.innerHTML = `<tr><td colspan="${colCount}" style="text-align: center; padding: 20px; color: var(--text-muted);">해당하는 학생 정보가 없습니다.</td></tr>`;
     return;
   }
@@ -333,6 +335,7 @@ function renderSearchResultTable(rows) {
             <button class="secondary" type="button" onclick="editStudentGrade('${row.student_id}')" style="padding: 4px 8px; font-size: 12px;">수정</button>
           </td>
           <td rowspan="2">${row.student_id}</td>
+          <td rowspan="2">${(rawData.student_name != null && rawData.student_name !== '') ? rawData.student_name : '-'}</td>
           ${subjectScoreCells}
           <td rowspan="2">${note}</td>
           <td rowspan="2">${updated}</td>
@@ -360,7 +363,9 @@ function filterGrades(keyword) {
       (row) => {
         if (!row || !row.student_id) return false;
         const studentId = String(row.student_id).toLowerCase();
-        return studentId.includes(keyword);
+        const rawData = allGradeData.find((r) => r.student_id === row.student_id);
+        const studentName = (rawData && rawData.student_name) ? String(rawData.student_name).toLowerCase() : '';
+        return studentId.includes(keyword) || studentName.includes(keyword);
       }
     );
   } catch (error) {
@@ -372,7 +377,7 @@ function filterGrades(keyword) {
 function renderTableBody(rows) {
   const tbody = document.querySelector('#grades-table tbody');
   if (!rows.length) {
-    const colCount = selectedSubjects.size + 3; // 학번, 비고, 수정일 포함
+    const colCount = selectedSubjects.size + 4; // 학번, 이름, 비고, 수정일 포함
     tbody.innerHTML = `<tr><td colspan="${colCount}">데이터가 없습니다.</td></tr>`;
     return;
   }
@@ -398,6 +403,8 @@ function renderTableBody(rows) {
           return `<td>${cellHtml}</td>`;
         })
         .join('');
+      const raw = allGradeData.find(r => r.student_id === row.student_id);
+      const nameDisplay = raw && raw.student_name ? raw.student_name : '-';
       const note = row.note || '-';
       const updated = row.updated_at
         ? new Date(row.updated_at).toLocaleString('ko-KR')
@@ -405,6 +412,7 @@ function renderTableBody(rows) {
       return `
         <tr>
           <td>${row.student_id}</td>
+          <td>${nameDisplay}</td>
           ${subjectCells}
           <td>${note}</td>
           <td>${updated}</td>
@@ -499,6 +507,8 @@ function editStudentGrade(studentId) {
   
   // 폼에 데이터 채우기
   document.getElementById('edit-student-id').value = studentId;
+  const editNameEl = document.getElementById('edit-student-name');
+  if (editNameEl) editNameEl.value = rawData.student_name || '';
   
   // 모든 레벨의 데이터 채우기
   LEVELS.forEach(level => {
@@ -620,6 +630,10 @@ async function handleEditSubmit(event) {
   } else {
     payload[NOTE_FIELD] = selectedRowForEdit[NOTE_FIELD] ?? null;
   }
+  
+  // 이름 업데이트
+  const studentNameEl = document.getElementById('edit-student-name');
+  payload.student_name = (studentNameEl && studentNameEl.value.trim()) || null;
   
   const statusEl = document.getElementById('edit-status');
   statusEl.textContent = '수정 중...';

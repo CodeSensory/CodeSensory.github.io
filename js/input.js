@@ -250,6 +250,12 @@ async function searchStudent(studentId) {
         graduateYearInput.value = data.graduate_year;
       }
       
+      // 이름 표시
+      const studentNameInput = document.getElementById('student-name-input');
+      if (studentNameInput && data.student_name != null && data.student_name !== undefined) {
+        studentNameInput.value = data.student_name;
+      }
+      
       // 재수강 해당 과목만 수정 불가 처리
       applyRetakeSubjectLocks(data);
       statusEl.textContent = `기존 학생 데이터를 불러왔습니다. (학번: ${data.student_id}, 레벨: ${currentLevel}) 재수강 과목은 수정할 수 없습니다.`;
@@ -296,6 +302,10 @@ function clearStudentData() {
   const graduateYearInput = document.getElementById('graduate-year-input');
   if (graduateYearInput) {
     graduateYearInput.value = '';
+  }
+  const studentNameInput = document.getElementById('student-name-input');
+  if (studentNameInput) {
+    studentNameInput.value = '';
   }
 }
 
@@ -376,6 +386,7 @@ async function handleManualSubmit(event) {
 
   const formData = new FormData(event.target);
   const studentId = formData.get('studentId')?.trim();
+  const studentName = formData.get('studentName')?.trim();
   const graduateYear = formData.get('graduateYear')?.trim();
   const level = formData.get('level') || currentLevel;
   const note = formData.get('note')?.trim();
@@ -393,6 +404,9 @@ async function handleManualSubmit(event) {
       const updateData = {
         student_id: studentId,
       };
+      if (studentName !== undefined) {
+        updateData.student_name = studentName || null;
+      }
       
       // 현재 레벨의 입력된 과목만 업데이트 (재수강 과목은 기존 값 유지)
       SUBJECTS.forEach((subjectKey, index) => {
@@ -511,6 +525,9 @@ async function handleManualSubmit(event) {
       
       // null 값 제거 (데이터베이스에 null로 저장되는 것을 방지)
       const cleanPayload = { student_id: studentId };
+      if (studentName !== undefined && studentName !== '') {
+        cleanPayload.student_name = studentName;
+      }
       Object.keys(payload).forEach(key => {
         const value = payload[key];
         // null, undefined, 빈 문자열이 아닌 경우만 포함
@@ -580,6 +597,11 @@ async function handleXlsxUpload() {
             student_id: studentId,
           };
           
+          const studentName = row.student_name || row.이름 || row.name || '';
+          if (studentName !== '' && studentName != null && studentName !== undefined) {
+            data.student_name = String(studentName).trim();
+          }
+          
           // 졸업 연도 파싱
           const graduateYear = row.graduate_year || row.졸업연도 || row.graduateYear || '';
           if (graduateYear !== '' && graduateYear !== null && graduateYear !== undefined) {
@@ -617,6 +639,11 @@ async function handleXlsxUpload() {
           student_id: studentId,
         };
         
+        const studentName = row.student_name || row.이름 || row.name || '';
+        if (studentName !== '' && studentName != null && studentName !== undefined) {
+          data.student_name = String(studentName).trim();
+        }
+        
         // 졸업 연도 파싱 (학번, 졸업연도 형식 지원)
         const graduateYear = row.graduate_year || row.졸업연도 || row.graduateYear || '';
         if (graduateYear !== '' && graduateYear !== null && graduateYear !== undefined) {
@@ -634,8 +661,11 @@ async function handleXlsxUpload() {
             return; // 달성도는 무시
           }
           
-          // 졸업연도는 이미 처리했으므로 건너뛰기
+          // 졸업연도, 이름은 이미 처리했으므로 건너뛰기
           if (key === 'graduate_year' || key === '졸업연도' || key === 'graduateYear') {
+            return;
+          }
+          if (key === 'student_name' || key === '이름' || key === 'name') {
             return;
           }
           

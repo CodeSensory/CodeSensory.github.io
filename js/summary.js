@@ -12,6 +12,12 @@ document.addEventListener('DOMContentLoaded', () => {
     selectedGraduateYear = e.target.value === '' ? null : parseInt(e.target.value);
     renderSummaryTable();
   });
+
+  // 학번 목록 모달 닫기
+  const summaryModal = document.getElementById('summary-student-modal');
+  const summaryModalClose = document.getElementById('summary-modal-close');
+  if (summaryModalClose) summaryModalClose.addEventListener('click', () => { if (summaryModal) summaryModal.style.display = 'none'; });
+  if (summaryModal) summaryModal.addEventListener('click', (e) => { if (e.target === summaryModal) summaryModal.style.display = 'none'; });
 });
 
 async function fetchGrades() {
@@ -99,144 +105,97 @@ function renderLevelTable(levelId, levelName, filteredData, totalCount) {
   }
   
   const level = levelName.toLowerCase();
-  const rows = [];
   
-  // 먼저 각 과목별로 데이터 수집 (연도별로 분류)
-  SUBJECTS.forEach((subjectKey, index) => {
-    const subjectNum = index + 1;
-    const subjectName = getSubjectName(subjectNum);
-    const achievementKey = getAchievementKey(level, index);
-    const levelSubjectKey = getSubjectKey(level, index);
-    
-    // 연도별로 데이터 분류: { 연도: { 과목명, 상, 중, 하 } }
-    const yearDataMap = new Map(); // key: "연도_과목명", value: { year, subjectName, high, mid, low }
-    const subjectNames = new Set();
-    
-    filteredData.forEach(row => {
+  // 1) 수강과목 기준 → 2) 핵심술기 과목 → 3) 수강년도 순으로 그룹화
+  // 키: "수강과목|핵심술기과목|수강년도" (점수에서 추출한 수강과목, 해당 열의 핵심술기 과목명, 수강년도)
+  const groupMap = new Map();
+  
+  filteredData.forEach((row) => {
+    SUBJECTS.forEach((subjectKey, index) => {
+      const subjectNum = index + 1;
+      const coreSubjectName = getSubjectName(subjectNum); // 핵심술기 과목 e.g. "1_활력징후"
+      const achievementKey = getAchievementKey(level, index);
+      const levelSubjectKey = getSubjectKey(level, index);
+      
       const scoreValue = row[levelSubjectKey];
-      const achievement = row[achievementKey];
+      const achievementRaw = row[achievementKey];
+      const achievement = (achievementRaw != null && String(achievementRaw).indexOf('(') > 0)
+        ? String(achievementRaw).trim().slice(0, String(achievementRaw).indexOf('('))
+        : (achievementRaw || '');
       
-      if (scoreValue !== null && scoreValue !== undefined && scoreValue !== '') {
-        const strValue = String(scoreValue);
-        // "점수(연도, 과목명)" 형식에서 연도와 과목명 추출
-        const match = strValue.match(/^\d+(?:\.\d+)?(?:\(([^,]*),\s*([^)]*)\))?$/);
-        
-        let year = null;
-        let extractedSubjectName = null;
-        
-        if (match) {
-          if (match[1]) {
-            year = match[1].trim();
-          }
-          if (match[2]) {
-            extractedSubjectName = match[2].trim();
-            if (extractedSubjectName) {
-              subjectNames.add(extractedSubjectName);
-            }
-          }
-        }
-        
-        // 연도와 과목명을 키로 사용
-        const yearKey = year || '-';
-        const subjectNameKey = extractedSubjectName || '-';
-        const mapKey = `${yearKey}_${subjectNameKey}`;
-        
-        if (!yearDataMap.has(mapKey)) {
-          yearDataMap.set(mapKey, {
-            year: year || '-',
-            subjectName: extractedSubjectName || '-',
-            high: 0,
-            mid: 0,
-            low: 0
-          });
-        }
-        
-        const yearData = yearDataMap.get(mapKey);
-        if (achievement === '상') {
-          yearData.high++;
-        } else if (achievement === '중') {
-          yearData.mid++;
-        } else if (achievement === '하') {
-          yearData.low++;
-        }
+      if (scoreValue === null || scoreValue === undefined || String(scoreValue).trim() === '') return;
+      
+      const strValue = String(scoreValue);
+      const match = strValue.match(/^\d+(?:\.\d+)?(?:\(([^,]*),\s*([^)]*)\))?$/);
+      let year = '-';
+      let courseName = '-'; // 수강과목 (점수 괄호 안 두 번째 값)
+      if (match) {
+        if (match[1]) year = match[1].trim() || '-';
+        if (match[2]) courseName = match[2].trim() || '-';
       }
-    });
-    
-    // 과목명 표시 (여러 개가 있으면 첫 번째 것만, 없으면 빈 문자열)
-    const displaySubjectName = subjectNames.size > 0 ? Array.from(subjectNames)[0] : '-';
-    
-    // 연도별로 행 생성
-    if (yearDataMap.size === 0) {
-      // 데이터가 없으면 기본 행 하나만 추가
-      rows.push({
-        level: levelName,
-        subjectName: displaySubjectName,
-        subject: subjectName,
-        year: '-',
-        high: '0(0)',
-        mid: '0(0)',
-        low: '0(0)'
-      });
-    } else {
-      // 연도별로 정렬하여 행 생성
-      const yearDataArray = Array.from(yearDataMap.values()).sort((a, b) => {
-        if (a.year === '-' && b.year !== '-') return 1;
-        if (a.year !== '-' && b.year === '-') return -1;
-        if (a.year === '-' && b.year === '-') return 0;
-        return parseInt(b.year) - parseInt(a.year); // 내림차순 (최신 연도 먼저)
-      });
       
-      yearDataArray.forEach((yearData, yearIndex) => {
-        const totalCount = yearData.high + yearData.mid + yearData.low;
-        const highPercent = totalCount > 0 ? Math.round((yearData.high / totalCount) * 100) : 0;
-        const midPercent = totalCount > 0 ? Math.round((yearData.mid / totalCount) * 100) : 0;
-        const lowPercent = totalCount > 0 ? Math.round((yearData.low / totalCount) * 100) : 0;
-        
-        // 각 연도 데이터의 과목명 사용 (없으면 전체 과목명 사용)
-        const rowSubjectName = yearData.subjectName !== '-' ? yearData.subjectName : displaySubjectName;
-        
-        rows.push({
-          level: levelName,
-          subjectName: rowSubjectName, // 각 연도 데이터의 과목명 사용
-          subject: subjectName, // 원본 과목 저장 (표시 여부는 그룹화에서 결정)
-          year: yearData.year === '-' ? '-' : `${yearData.year}년`,
-          high: `${yearData.high}(${highPercent})`,
-          mid: `${yearData.mid}(${midPercent})`,
-          low: `${yearData.low}(${lowPercent})`
+      const mapKey = courseName + '|' + coreSubjectName + '|' + year;
+      if (!groupMap.has(mapKey)) {
+        groupMap.set(mapKey, {
+          subjectName: courseName,
+          coreSubject: coreSubjectName,
+          year: year,
+          high: 0,
+          mid: 0,
+          low: 0,
+          highIds: [],
+          midIds: [],
+          lowIds: []
         });
-      });
-    }
+      }
+      const g = groupMap.get(mapKey);
+      const sid = row.student_id != null ? String(row.student_id).trim() : '';
+      if (achievement === '상') { g.high++; if (sid) g.highIds.push(sid); }
+      else if (achievement === '중') { g.mid++; if (sid) g.midIds.push(sid); }
+      else if (achievement === '하') { g.low++; if (sid) g.lowIds.push(sid); }
+    });
   });
   
-  // 과목명별로 그룹화 (과목명은 합치되, 과목과 연도는 각각 별도 행으로 유지)
-  // 먼저 과목명 -> 과목 -> 연도 순으로 정렬
+  const rows = Array.from(groupMap.values()).map((g) => {
+    const total = g.high + g.mid + g.low;
+    const highP = total > 0 ? Math.round((g.high / total) * 100) : 0;
+    const midP = total > 0 ? Math.round((g.mid / total) * 100) : 0;
+    const lowP = total > 0 ? Math.round((g.low / total) * 100) : 0;
+    return {
+      level: levelName,
+      subjectName: g.subjectName,
+      subject: g.coreSubject,
+      year: g.year === '-' ? '-' : g.year + '년',
+      high: g.high + '(' + highP + ')',
+      mid: g.mid + '(' + midP + ')',
+      low: g.low + '(' + lowP + ')',
+      highIds: g.highIds || [],
+      midIds: g.midIds || [],
+      lowIds: g.lowIds || []
+    };
+  });
+  
+  // 정렬: 1) 수강과목(과목명) 2) 핵심술기 과목 3) 수강년도(내림차순)
   const sortedRows = [...rows].sort((a, b) => {
-    // 1. 과목명으로 정렬
     const nameA = a.subjectName || '-';
     const nameB = b.subjectName || '-';
     if (nameA !== nameB) {
       if (nameA === '-') return 1;
       if (nameB === '-') return -1;
-      const nameCompare = nameA.localeCompare(nameB, 'ko');
-      if (nameCompare !== 0) return nameCompare;
+      const c = nameA.localeCompare(nameB, 'ko');
+      if (c !== 0) return c;
     }
-    
-    // 2. 과목으로 정렬
-    const subjectA = a.subject || '';
-    const subjectB = b.subject || '';
-    if (subjectA !== subjectB) {
-      return subjectA.localeCompare(subjectB, 'ko');
-    }
-    
-    // 3. 연도로 정렬 (내림차순 - 최신 연도 먼저)
+    const subjA = a.subject || '';
+    const subjB = b.subject || '';
+    if (subjA !== subjB) return subjA.localeCompare(subjB, 'ko');
     const yearA = a.year || '-';
     const yearB = b.year || '-';
     if (yearA === '-' && yearB !== '-') return 1;
     if (yearA !== '-' && yearB === '-') return -1;
     if (yearA === '-' && yearB === '-') return 0;
-    const yearNumA = parseInt(yearA.replace('년', ''));
-    const yearNumB = parseInt(yearB.replace('년', ''));
-    return yearNumB - yearNumA;
+    const numA = parseInt(String(yearA).replace('년', ''), 10);
+    const numB = parseInt(String(yearB).replace('년', ''), 10);
+    return (numB - numA);
   });
   
   const groupedRows = [];
@@ -285,36 +244,77 @@ function renderLevelTable(levelId, levelName, filteredData, totalCount) {
       high: row.high,
       mid: row.mid,
       low: row.low,
+      highIds: row.highIds || [],
+      midIds: row.midIds || [],
+      lowIds: row.lowIds || [],
       isFirstInGroup: isNewGroup,
-      isNewGroup: isNewGroup // 새 그룹 시작 행에만 true
+      isNewGroup: isNewGroup
     });
   });
   
   // 테이블 렌더링 (과목명은 합쳐지고, 과목과 연도는 각각 별도 행)
+  const highIdsStr = (row) => (row.highIds && row.highIds.length) ? row.highIds.join(',') : '';
+  const midIdsStr = (row) => (row.midIds && row.midIds.length) ? row.midIds.join(',') : '';
+  const lowIdsStr = (row) => (row.lowIds && row.lowIds.length) ? row.lowIds.join(',') : '';
+
   tbody.innerHTML = groupedRows.map((row, rowIndex) => {
-    // 그룹 시작 행 스타일 (굵은 선만)
     const rowStyle = row.isNewGroup 
       ? `style="border-top: 3px solid #ff8000;"` 
       : '';
     
-    // 과목명 셀 스타일 (색상과 굵은 글씨만)
     const subjectNameStyle = row.isFirstInGroup && row.subjectName && row.subjectName !== '-'
       ? `style="font-weight: 700; color: #ff8000;"`
       : '';
     
+    const highIds = highIdsStr(row);
+    const midIds = midIdsStr(row);
+    const lowIds = lowIdsStr(row);
+    const clickableClass = 'summary-clickable';
+    const highTd = highIds ? `<td class="${clickableClass}" data-achievement="상" data-ids="${highIds}" style="cursor: pointer; text-decoration: underline;" title="클릭 시 학번 목록">${row.high}</td>` : `<td>${row.high}</td>`;
+    const midTd = midIds ? `<td class="${clickableClass}" data-achievement="중" data-ids="${midIds}" style="cursor: pointer; text-decoration: underline;" title="클릭 시 학번 목록">${row.mid}</td>` : `<td>${row.mid}</td>`;
+    const lowTd = lowIds ? `<td class="${clickableClass}" data-achievement="하" data-ids="${lowIds}" style="cursor: pointer; text-decoration: underline;" title="클릭 시 학번 목록">${row.low}</td>` : `<td>${row.low}</td>`;
+
     return `
       <tr ${rowStyle}>
         <td>${row.level}</td>
         <td ${subjectNameStyle}>${row.subjectName || ''}</td>
         <td>${row.subject || ''}</td>
         <td>${row.year || '-'}</td>
-        <td>${row.high}</td>
-        <td>${row.mid}</td>
-        <td>${row.low}</td>
+        ${highTd}
+        ${midTd}
+        ${lowTd}
       </tr>
     `;
   }).join('');
+
+  // 상/중/하 셀 클릭 시 학번 목록 팝업
+  tbody.querySelectorAll('.summary-clickable').forEach((td) => {
+    td.addEventListener('click', function () {
+      const achievement = this.getAttribute('data-achievement');
+      const idsStr = this.getAttribute('data-ids') || '';
+      const ids = idsStr ? idsStr.split(',').filter(Boolean) : [];
+      showSummaryStudentModal(achievement, ids);
+    });
+  });
   
   statusEl.textContent = `${totalCount}건`;
+}
+
+function showSummaryStudentModal(achievement, studentIds) {
+  const modal = document.getElementById('summary-student-modal');
+  const titleEl = document.getElementById('summary-modal-title');
+  const listEl = document.getElementById('summary-modal-list');
+  if (!modal || !titleEl || !listEl) return;
+  titleEl.textContent = achievement + ' (' + studentIds.length + '명)';
+  listEl.innerHTML = studentIds.map((sid) => {
+    const row = allGradeData.find((r) => String(r.student_id).trim() === sid);
+    const name = row && row.student_name ? row.student_name : '';
+    const display = name ? sid + ' (' + name + ')' : sid;
+    return '<li style="padding: 8px 0; border-bottom: 1px solid var(--border-color);">' + display + '</li>';
+  }).join('');
+  if (studentIds.length === 0) {
+    listEl.innerHTML = '<li style="padding: 8px 0; color: var(--text-muted);">해당 인원이 없습니다.</li>';
+  }
+  modal.style.display = 'flex';
 }
 

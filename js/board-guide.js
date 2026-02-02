@@ -216,31 +216,31 @@
 </ul>
 
 <h4>6. 페이지별 기능 안내</h4>
-<p>이 게시판 페이지의 <strong>페이지별 기능 안내</strong> 탭에는, 성적 입력/관리, 성적 조회, 성적 요약, 관리 필요, 재수강 성적 입력, 재수강 인원 조회, 엑셀 템플릿 다운로드, 게시판, 가입 요청 관리(관리자 전용)를 포함한 모든 메뉴의 사용 방법이 정리되어 있습니다. 각 항목을 펼치면 해당 페이지의 기능·입력 항목·버튼 동작·데이터 형식 등을 자세히 확인할 수 있습니다.</p>
+<p>이 게시판 페이지의 <strong>페이지별 기능 안내</strong> 탭에는, 성적 입력/관리, 성적 조회, 성적 요약, 관리 필요, 재수강 성적 입력, 재수강 인원 조회, 엑셀 템플릿 다운로드, 게시판을 포함한 메뉴의 사용 방법이 정리되어 있습니다. 각 항목을 펼치면 해당 페이지의 기능·입력 항목·버튼 동작·데이터 형식·다운로드 위치 등을 자세히 확인할 수 있습니다.</p>
 `
     },
     {
       id: 'download-templates',
       pageName: '엑셀 템플릿 다운로드',
       title: '핵심술기·졸업 연도 엑셀 템플릿 다운로드',
+      url: 'download-templates.html',
       content: `
-<h4>1. 기능 개요</h4>
-<p>성적 일괄 업로드 시 사용할 <strong>엑셀 템플릿</strong>을 다운로드할 수 있는 페이지입니다. <strong>핵심술기 성적 업로드용.xlsx</strong>와 <strong>졸업 연도 업로드용.xlsx</strong> 두 종류를 제공하며, 각 파일의 열 구성(학번, 학생 이름, 18개 과목 점수·달성도 등)을 확인한 뒤 다운로드 버튼으로 파일을 받을 수 있습니다.</p>
-
-<h4>2. 템플릿 구성</h4>
+<h4>1. 다운로드 위치</h4>
+<p>엑셀 템플릿은 <strong>엑셀 템플릿 다운로드</strong> 전용 페이지에서 받을 수 있습니다.</p>
 <ul>
-  <li><strong>핵심술기 성적 업로드용</strong>: 학번, 학생 이름(선택), L1·L2·L3 레벨별 18개 과목의 점수·달성도 열이 포함됩니다. 미리보기(preview) 페이지에서 이 파일을 업로드하면 열 매핑 후 일괄 저장 시 student_grades에 반영되며, 학생 이름 열을 매핑하면 student_name에도 저장됩니다.</li>
-  <li><strong>졸업 연도 업로드용</strong>: 학번·졸업 연도 등 졸업 연도 일괄 반영용 시트입니다. 업로드·반영 방식은 해당 기능 연동 시 안내에 따릅니다.</li>
+  <li><strong>접속 방법</strong>: 브라우저 주소창에 사이트 주소 뒤에 <strong>download-templates.html</strong>을 입력하여 접속합니다. (예: https://[사이트도메인]/download-templates.html)</li>
+  <li>게시판 공지에 등록된 <strong>「핵심술기 성적 업로드용 엑셀 템플릿 다운로드」</strong>, <strong>「졸업 연도 업로드용 엑셀 템플릿 다운로드」</strong> 글의 다운로드 링크를 클릭해도 해당 페이지로 이동할 수 있습니다.</li>
+  <li>해당 페이지에는 <strong>핵심술기 성적 업로드용.xlsx 다운로드</strong>, <strong>졸업 연도 업로드용.xlsx 다운로드</strong> 버튼이 있으며, 버튼을 클릭하면 해당 엑셀 파일이 즉시 다운로드됩니다.</li>
 </ul>
-`
-    },
-    {
-      id: 'signup-requests',
-      pageName: '가입 요청 관리',
-      title: '가입 요청 관리(관리자 전용)',
-      content: `
-<h4>1. 기능 개요</h4>
-<p><strong>관리자 전용</strong> 페이지로, 앱 가입 요청을 승인·거절하는 기능을 제공합니다. 일반 사용자는 접근할 수 없으며, 관리자 권한이 있는 계정으로 로그인한 경우에만 메뉴에서 접근 가능합니다. 가입 요청 목록 조회, 승인·거절 처리 등 세부 사용 방법은 별도 운영 안내에 따릅니다.</p>
+
+<h4>2. 기능 개요</h4>
+<p>성적 일괄 업로드 시 사용할 <strong>엑셀 템플릿</strong> 두 종류를 제공합니다. <strong>핵심술기 성적 업로드용.xlsx</strong>와 <strong>졸업 연도 업로드용.xlsx</strong>의 열 구성(학번, 학생 이름, 18개 과목 점수·달성도 등)을 확인한 뒤 다운로드 버튼으로 파일을 받을 수 있습니다.</p>
+
+<h4>3. 템플릿 구성</h4>
+<ul>
+  <li><strong>핵심술기 성적 업로드용</strong>: 학번, 이름(학생 이름), 졸업연도, L1·L2·L3 레벨별 18개 과목(1_활력징후 ~ 18_배액관 관리) 열이 포함됩니다. 성적 입력/관리 → 엑셀 업로드 탭에서 레벨을 선택한 뒤 이 파일을 채워 업로드하면 되며, 미리보기(preview) 페이지에서 열 매핑 후 일괄 저장 시 student_grades에 반영됩니다. 학생 이름 열을 매핑하면 student_name에도 저장됩니다.</li>
+  <li><strong>졸업 연도 업로드용</strong>: 학번, 졸업연도 열만 포함됩니다. 성적 입력/관리 → 엑셀 업로드 탭에서 레벨 선택을 「졸업 연도」로 두고 이 파일을 채워 업로드하면 학번별 졸업 연도가 일괄 반영됩니다.</li>
+</ul>
 `
     }
   ];
@@ -250,10 +250,15 @@
     if (!container) return;
 
     container.innerHTML = BOARD_GUIDE_ARTICLES.map(function (article) {
+      const url = article.url ? escapeHtml(article.url) : '';
+      const linkHtml = url
+        ? ' <a href="' + url + '" class="board-guide-page-link" onclick="event.stopPropagation()">해당 페이지로 이동 →</a>'
+        : '';
       return (
         '<details class="board-guide-item">' +
         '<summary class="board-guide-summary">' +
         '<strong>' + escapeHtml(article.pageName) + '</strong> – ' + escapeHtml(article.title) +
+        linkHtml +
         '</summary>' +
         '<div class="board-guide-content">' + article.content + '</div>' +
         '</details>'

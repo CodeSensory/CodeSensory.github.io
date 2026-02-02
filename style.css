@@ -930,6 +930,16 @@ td.low-achievement-cell {
 .board-guide-item summary:hover {
   background: var(--bg-tertiary);
 }
+.board-guide-page-link {
+  margin-left: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--mclaren-orange, #ff8000);
+  text-decoration: none;
+}
+.board-guide-page-link:hover {
+  text-decoration: underline;
+}
 .board-guide-content {
   padding: 16px 16px 20px 36px;
   border-top: 1px solid var(--border-color);

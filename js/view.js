@@ -1,5 +1,5 @@
 let gradeRows = [];
-let selectedSubjects = new Set(SUBJECTS); // 기본적으로 모든 과목 선택
+let selectedSubjects = null; // 초기화는 DOMContentLoaded에서 수행
 let currentSearchKeyword = ''; // 현재 검색 키워드 저장
 let allGradeData = []; // 원본 데이터 보관 (달성도 포함)
 let selectedRowForEdit = null; // 수정할 행 데이터
@@ -8,6 +8,13 @@ let currentLevel = 'l1'; // 현재 선택된 레벨
 // 공통 유틸리티 함수는 config.js에서 가져옴
 
 document.addEventListener('DOMContentLoaded', () => {
+  // SUBJECTS가 로드되었는지 확인하고 selectedSubjects 초기화
+  if (typeof SUBJECTS !== 'undefined' && Array.isArray(SUBJECTS) && SUBJECTS.length > 0) {
+    selectedSubjects = new Set(SUBJECTS); // 기본적으로 모든 과목 선택
+  } else {
+    selectedSubjects = new Set();
+  }
+  
   // DOM 요소 캐싱 (성능 최적화)
   const elements = {
     levelSelect: document.getElementById('level-select'),
@@ -24,8 +31,21 @@ document.addEventListener('DOMContentLoaded', () => {
     subjectCheckboxes: document.getElementById('subject-checkboxes')
   };
 
-  renderSubjectCheckboxes();
-  renderTableHeader();
+  // SUBJECTS가 로드되었는지 다시 확인
+  if (typeof SUBJECTS !== 'undefined' && Array.isArray(SUBJECTS) && SUBJECTS.length > 0) {
+    if (!selectedSubjects || selectedSubjects.size === 0) {
+      selectedSubjects = new Set(SUBJECTS);
+    }
+    renderSubjectCheckboxes();
+    renderTableHeader();
+  } else {
+    const statusEl = elements.viewStatus;
+    if (statusEl) {
+      statusEl.textContent = '초기화 오류: config.js 파일이 로드되지 않았습니다.';
+      statusEl.style.color = 'var(--text-muted)';
+    }
+  }
+  
   fetchGrades();
 
   // 레벨 선택 변경 이벤트
@@ -103,7 +123,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           }
         } catch (error) {
-          console.error('검색 중 오류 발생:', error);
           if (statusEl) {
             statusEl.textContent = `검색 중 오류가 발생했습니다: ${error.message}`;
             statusEl.style.color = 'var(--text-muted)';
@@ -134,30 +153,33 @@ document.addEventListener('DOMContentLoaded', () => {
   
   if (elements.selectAllBtn) {
     elements.selectAllBtn.addEventListener('click', () => {
-    selectedSubjects = new Set(SUBJECTS);
-    updateCheckboxes();
-    renderTableHeader();
-    if (currentSearchKeyword) {
-      // 검색 결과가 있으면 검색 결과 테이블만 업데이트
-      const filtered = filterGrades(currentSearchKeyword);
-      renderSearchResultTable(filtered);
-    } else {
-      renderTableBody(gradeRows);
-    }
-  });
+      selectedSubjects = new Set(SUBJECTS);
+      updateCheckboxes();
+      renderTableHeader();
+      if (currentSearchKeyword) {
+        // 검색 결과가 있으면 검색 결과 테이블만 업데이트
+        const filtered = filterGrades(currentSearchKeyword);
+        renderSearchResultTable(filtered);
+      } else {
+        renderTableBody(gradeRows);
+      }
+    });
+  }
   
-  document.getElementById('deselect-all-btn').addEventListener('click', () => {
-    selectedSubjects.clear();
-    updateCheckboxes();
-    renderTableHeader();
-    if (currentSearchKeyword) {
-      // 검색 결과가 있으면 검색 결과 테이블만 업데이트
-      const filtered = filterGrades(currentSearchKeyword);
-      renderSearchResultTable(filtered);
-    } else {
-      renderTableBody(gradeRows);
-    }
-  });
+  if (elements.deselectAllBtn) {
+    elements.deselectAllBtn.addEventListener('click', () => {
+      selectedSubjects.clear();
+      updateCheckboxes();
+      renderTableHeader();
+      if (currentSearchKeyword) {
+        // 검색 결과가 있으면 검색 결과 테이블만 업데이트
+        const filtered = filterGrades(currentSearchKeyword);
+        renderSearchResultTable(filtered);
+      } else {
+        renderTableBody(gradeRows);
+      }
+    });
+  }
   
   // 수정 폼 초기화
   initEditForm();
@@ -174,6 +196,16 @@ document.addEventListener('DOMContentLoaded', () => {
 function renderSubjectCheckboxes() {
   const container = document.getElementById('subject-checkboxes');
   if (!container) return;
+  
+  if (typeof SUBJECTS === 'undefined' || !Array.isArray(SUBJECTS) || SUBJECTS.length === 0) {
+    container.innerHTML = '<p style="color: var(--text-muted);">과목 목록을 불러올 수 없습니다.</p>';
+    return;
+  }
+  
+  if (!selectedSubjects || selectedSubjects.size === 0) {
+    selectedSubjects = new Set(SUBJECTS);
+  }
+  
   container.innerHTML = SUBJECTS.map((subject, index) => {
     const isChecked = selectedSubjects.has(subject);
     const subjectName = getSubjectName(index + 1);
@@ -185,24 +217,26 @@ function renderSubjectCheckboxes() {
     `;
   }).join('');
   
-    // 체크박스 변경 이벤트 리스너 추가
+  // 체크박스 변경 이벤트 리스너 추가
   SUBJECTS.forEach((subject) => {
     const checkbox = document.getElementById(`chk-${subject}`);
-    checkbox.addEventListener('change', (e) => {
-      if (e.target.checked) {
-        selectedSubjects.add(subject);
-      } else {
-        selectedSubjects.delete(subject);
-      }
-      renderTableHeader();
-      if (currentSearchKeyword) {
-        // 검색 결과가 있으면 검색 결과 테이블만 업데이트
-        const filtered = filterGrades(currentSearchKeyword);
-        renderSearchResultTable(filtered);
-      } else {
-        renderTableBody(gradeRows);
-      }
-    });
+    if (checkbox) {
+      checkbox.addEventListener('change', (e) => {
+        if (e.target.checked) {
+          selectedSubjects.add(subject);
+        } else {
+          selectedSubjects.delete(subject);
+        }
+        renderTableHeader();
+        if (currentSearchKeyword) {
+          // 검색 결과가 있으면 검색 결과 테이블만 업데이트
+          const filtered = filterGrades(currentSearchKeyword);
+          renderSearchResultTable(filtered);
+        } else {
+          renderTableBody(gradeRows);
+        }
+      });
+    }
   });
 }
 
@@ -215,16 +249,35 @@ function updateCheckboxes() {
   });
 }
 
+// 선택된 과목 배열을 정렬하여 반환하는 헬퍼 함수
+function getSortedSelectedSubjects() {
+  if (!selectedSubjects || selectedSubjects.size === 0) {
+    if (typeof SUBJECTS !== 'undefined' && Array.isArray(SUBJECTS) && SUBJECTS.length > 0) {
+      selectedSubjects = new Set(SUBJECTS);
+    } else {
+      return [];
+    }
+  }
+  return Array.from(selectedSubjects).sort((a, b) => SUBJECTS.indexOf(a) - SUBJECTS.indexOf(b));
+}
+
 function renderTableHeader() {
   const thead = document.querySelector('#grades-table thead');
+  if (!thead) return;
+  
+  const selectedSubjectsArray = getSortedSelectedSubjects();
+  if (selectedSubjectsArray.length === 0) {
+    thead.innerHTML = '<tr><th colspan="20">초기화 오류: SUBJECTS를 불러올 수 없습니다.</th></tr>';
+    return;
+  }
+  
+  const subjectsToShow = selectedSubjectsArray.length > 0 ? selectedSubjectsArray : (SUBJECTS || []);
   const headerRow = document.createElement('tr');
-  const selectedSubjectsArray = Array.from(selectedSubjects).sort((a, b) => {
-    return SUBJECTS.indexOf(a) - SUBJECTS.indexOf(b);
-  });
+  
   headerRow.innerHTML = `
     <th>학번</th>
     <th>이름</th>
-    ${selectedSubjectsArray.map((key) => `<th>${getSubjectName(SUBJECTS.indexOf(key) + 1)}</th>`).join('')}
+    ${subjectsToShow.map((key) => `<th>${getSubjectName(SUBJECTS.indexOf(key) + 1)}</th>`).join('')}
     <th>비고</th>
     <th>수정일</th>
   `;
@@ -234,10 +287,10 @@ function renderTableHeader() {
 
 function renderSearchResultTableHeader() {
   const thead = document.querySelector('#search-result-table thead');
+  if (!thead) return;
+  
   const headerRow = document.createElement('tr');
-  const selectedSubjectsArray = Array.from(selectedSubjects).sort((a, b) => {
-    return SUBJECTS.indexOf(a) - SUBJECTS.indexOf(b);
-  });
+  const selectedSubjectsArray = getSortedSelectedSubjects();
   
   // 학번 검색 시 L1, L2, L3를 3열로 표시
   const subjectHeaders = selectedSubjectsArray.map((key) => {
@@ -268,21 +321,12 @@ function renderSearchResultTableHeader() {
 
 
 function renderSearchResultTable(rows) {
-  // 검색 결과 테이블 표시
   const container = document.getElementById('search-result-container');
-  if (!container) {
-    console.error('search-result-container를 찾을 수 없습니다.');
-    return;
-  }
+  const tbody = document.querySelector('#search-result-table tbody');
+  if (!container || !tbody) return;
   
   container.style.display = 'block';
   renderSearchResultTableHeader();
-  
-  const tbody = document.querySelector('#search-result-table tbody');
-  if (!tbody) {
-    console.error('search-result-table tbody를 찾을 수 없습니다.');
-    return;
-  }
   
   if (!rows || rows.length === 0) {
     const colCount = selectedSubjects.size * 3 + 5; // L1, L2, L3 각각 + 수정 버튼, 학번, 이름, 비고, 수정일 포함
@@ -290,9 +334,7 @@ function renderSearchResultTable(rows) {
     return;
   }
 
-  const selectedSubjectsArray = Array.from(selectedSubjects).sort((a, b) => {
-    return SUBJECTS.indexOf(a) - SUBJECTS.indexOf(b);
-  });
+  const selectedSubjectsArray = getSortedSelectedSubjects();
   const subjectIndices = selectedSubjectsArray.map(subj => {
     const idx = SUBJECTS.indexOf(subj);
     return idx;
@@ -365,38 +407,41 @@ function filterGrades(keyword) {
   }
   
   if (!gradeRows || !Array.isArray(gradeRows) || gradeRows.length === 0) {
-    console.warn('gradeRows가 비어있거나 유효하지 않습니다.');
     return [];
   }
   
   try {
-    return gradeRows.filter(
-      (row) => {
-        if (!row || !row.student_id) return false;
-        const studentId = String(row.student_id).toLowerCase();
-        const rawData = allGradeData.find((r) => r.student_id === row.student_id);
-        const studentName = (rawData && rawData.student_name) ? String(rawData.student_name).toLowerCase() : '';
-        return studentId.includes(keyword) || studentName.includes(keyword);
-      }
-    );
+    return gradeRows.filter((row) => {
+      if (!row || !row.student_id) return false;
+      const studentId = String(row.student_id).toLowerCase();
+      const rawData = allGradeData.find((r) => r.student_id === row.student_id);
+      const studentName = (rawData && rawData.student_name) ? String(rawData.student_name).toLowerCase() : '';
+      return studentId.includes(keyword) || studentName.includes(keyword);
+    });
   } catch (error) {
-    console.error('필터링 중 오류 발생:', error);
     return [];
   }
 }
 
 function renderTableBody(rows) {
   const tbody = document.querySelector('#grades-table tbody');
-  if (!rows.length) {
-    const colCount = selectedSubjects.size + 4; // 학번, 이름, 비고, 수정일 포함
+  if (!tbody) return;
+  
+  const selectedSubjectsArray = getSortedSelectedSubjects();
+  if (selectedSubjectsArray.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="20">초기화 오류가 발생했습니다.</td></tr>';
+    return;
+  }
+  
+  if (!rows || !rows.length) {
+    const colCount = selectedSubjectsArray.length + 4; // 학번, 이름, 비고, 수정일 포함
     tbody.innerHTML = `<tr><td colspan="${colCount}">데이터가 없습니다.</td></tr>`;
     return;
   }
 
-  const selectedSubjectsArray = Array.from(selectedSubjects).sort((a, b) => {
-    return SUBJECTS.indexOf(a) - SUBJECTS.indexOf(b);
-  });
-  const subjectIndices = selectedSubjectsArray.map(subj => {
+  const subjectsToShow = selectedSubjectsArray.length > 0 ? selectedSubjectsArray : (SUBJECTS || []);
+  
+  const subjectIndices = subjectsToShow.map(subj => {
     const idx = SUBJECTS.indexOf(subj);
     return idx;
   });
@@ -435,9 +480,20 @@ function renderTableBody(rows) {
 
 async function fetchGrades() {
   const statusEl = document.getElementById('view-status');
+  if (!statusEl) return;
+  
   statusEl.textContent = '데이터를 불러오는 중...';
+  statusEl.style.color = '';
 
   try {
+    if (!window.db) {
+      throw new Error('Firestore가 초기화되지 않았습니다. config.js 파일이 로드되었는지 확인하세요.');
+    }
+    
+    if (typeof DB_UTILS === 'undefined') {
+      throw new Error('DB_UTILS가 정의되지 않았습니다. db-utils.js 파일이 로드되었는지 확인하세요.');
+    }
+    
     const { data, error } = await DB_UTILS.fetchAllGrades({ orderBy: 'student_id', ascending: true });
 
     if (error) throw error;
@@ -461,26 +517,38 @@ async function fetchGrades() {
     if (currentSearchKeyword) {
       const filtered = filterGrades(currentSearchKeyword);
       renderSearchResultTable(filtered);
-      document.querySelector('#grades-table').closest('.table-container').style.display = 'none';
+      const gradesTableContainer = document.querySelector('#grades-table')?.closest('.table-container');
+      if (gradesTableContainer) gradesTableContainer.style.display = 'none';
       
       if (filtered.length === 0) {
-        const searchInput = document.getElementById('search-student').value.trim();
-        statusEl.textContent = `"${searchInput}"에 해당하는 학생 정보가 없습니다.`;
+        const searchInput = document.getElementById('search-student');
+        const keyword = searchInput ? searchInput.value.trim() : '';
+        statusEl.textContent = `"${keyword}"에 해당하는 학생 정보가 없습니다.`;
         statusEl.style.color = 'var(--text-muted)';
       } else {
         statusEl.textContent = `검색 결과: ${filtered.length}건 (전체 ${gradeRows.length}건)`;
         statusEl.style.color = '';
       }
     } else {
-      document.getElementById('search-result-container').style.display = 'none';
-      document.querySelector('#grades-table').closest('.table-container').style.display = 'block';
+      const searchResultContainer = document.getElementById('search-result-container');
+      const gradesTableContainer = document.querySelector('#grades-table')?.closest('.table-container');
+      
+      if (searchResultContainer) searchResultContainer.style.display = 'none';
+      if (gradesTableContainer) gradesTableContainer.style.display = 'block';
+      
       renderTableBody(gradeRows);
       statusEl.textContent = `총 ${gradeRows.length}건`;
       statusEl.style.color = '';
     }
   } catch (err) {
-    console.error(err);
-    statusEl.textContent = `불러오기 실패: ${err.message}`;
+    statusEl.textContent = `불러오기 실패: ${err.message || '알 수 없는 오류'}`;
+    statusEl.style.color = 'var(--text-muted)';
+    
+    // 에러 발생 시에도 빈 테이블 표시
+    const tbody = document.querySelector('#grades-table tbody');
+    if (tbody) {
+      tbody.innerHTML = '<tr><td colspan="20">데이터를 불러오는 중 오류가 발생했습니다.</td></tr>';
+    }
   }
 }
 
@@ -673,7 +741,7 @@ async function handleEditSubmit(event) {
       cancelEdit();
     }, 1500);
   } catch (err) {
-    console.error(err);
+    // 에러는 조용히 처리
     statusEl.textContent = `수정 실패: ${err.message}`;
     statusEl.style.color = 'var(--text-muted)';
   }

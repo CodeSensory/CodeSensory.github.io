@@ -1,0 +1,39 @@
+# Firebase 설정 파일 (민감 정보 포함)
+# 주의: GitHub Pages 배포를 위해 주석 처리했습니다.
+# Firebase API 키는 클라이언트에 노출되는 것이 정상이며,
+# Firebase Console에서 API 키 제한 설정으로 보호하세요.
+# public/config.js
+
+# 환경 변수 파일
+.env
+.env.local
+.env.*.local
+
+# 로그 파일
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 의존성 디렉토리
+node_modules/
+
+# 빌드 결과물
+dist/
+build/
+*.map
+
+# IDE 설정 파일
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS 파일
+.DS_Store
+Thumbs.db
+
+# 임시 파일
+*.tmp
+*.temp

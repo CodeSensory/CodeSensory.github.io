@@ -13,15 +13,24 @@
     if (!titleEl) return;
 
     try {
-      const { data, error } = await supabase
-        .from(BOARD_TABLE)
-        .select('title')
-        .order('created_at', { ascending: false })
+      if (!window.db) {
+        throw new Error('Firestore가 초기화되지 않았습니다.');
+      }
+      
+      const snapshot = await window.db.collection(BOARD_TABLE)
+        .orderBy('created_at', 'desc')
         .limit(1)
-        .maybeSingle();
+        .get();
 
-      if (error) throw error;
+      if (snapshot.empty) {
+        titleEl.textContent = '(게시글이 없습니다.)';
+        titleEl.style.color = 'var(--text-muted)';
+        return;
+      }
 
+      const doc = snapshot.docs[0];
+      const data = doc.data();
+      
       if (data && data.title != null) {
         titleEl.textContent = data.title;
         titleEl.style.color = '';

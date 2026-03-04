@@ -346,13 +346,11 @@ async function insertCriteriaAnnouncements() {
       `총 ${stats.n}명`
     ].join('\n');
 
-    const { error } = await supabase
-      .from(BOARD_TABLE)
-      .insert({
-        title,
-        author: BOARD_AUTHOR,
-        content
-      });
+    const { error } = await DB_UTILS.insertAnnouncement({
+      title,
+      author: BOARD_AUTHOR,
+      content
+    });
     if (error) throw error;
   }
   return sortedKeys.length;
@@ -386,14 +384,12 @@ function calculateAchievementForSubject(subjectKey) {
 
 async function loadExistingStudentIds() {
   try {
-    const { data, error } = await supabase
-      .from('student_grades')
-      .select('student_id');
+    const { data, error } = await DB_UTILS.fetchExistingStudentIds();
     
     if (error) throw error;
     
     // 학번을 정규화하여 저장 (문자열로 변환하고 공백 제거)
-    existingStudentIds = new Set(data.map(row => String(row.student_id || '').trim()).filter(id => id));
+    existingStudentIds = data;
   } catch (err) {
     console.error('기존 학번 로드 실패:', err);
   }
@@ -741,9 +737,7 @@ async function performSave() {
   
   try {
     // 기존 학생 데이터 가져오기
-    const { data: existingData, error: fetchError } = await supabase
-      .from('student_grades')
-      .select('*');
+    const { data: existingData, error: fetchError } = await DB_UTILS.fetchAllGrades();
     
     if (fetchError) throw fetchError;
     
@@ -985,17 +979,13 @@ async function performSave() {
     // 신규 데이터 삽입 (개별 처리로 오류 추적 용이)
     if (finalNewPayloads.length > 0) {
       // 배치 삽입 시도
-      const { error: insertError } = await supabase
-        .from('student_grades')
-        .insert(finalNewPayloads);
+      const { error: insertError } = await DB_UTILS.insertGrade(finalNewPayloads);
       
       if (insertError) {
         // 배치 삽입 실패 시 개별 삽입으로 재시도
         console.warn('배치 삽입 실패, 개별 삽입으로 재시도:', insertError);
         for (const newPayload of finalNewPayloads) {
-          const { error: singleInsertError } = await supabase
-            .from('student_grades')
-            .insert([newPayload]);
+          const { error: singleInsertError } = await DB_UTILS.insertGrade([newPayload]);
           
           if (singleInsertError) {
             console.error(`학번 ${newPayload.student_id} 삽입 실패:`, singleInsertError);
@@ -1012,10 +1002,7 @@ async function performSave() {
         // student_id를 제외한 업데이트 데이터만 추출
         const { student_id, ...updateData } = updatePayload;
         
-        const { error: updateError } = await supabase
-          .from('student_grades')
-          .update(updateData)
-          .eq('student_id', studentId);
+        const { error: updateError } = await DB_UTILS.updateGrade(studentId, updateData);
         
         if (updateError) {
           console.error(`학번 ${studentId} 업데이트 실패:`, updateError);

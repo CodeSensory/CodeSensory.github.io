@@ -6,7 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>비밀번호 초기화 요청 - 간호학과 성적 관리</title>
   <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.2/dist/umd/supabase.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 
 <body>
@@ -14,7 +15,8 @@
     <header class="site-header auth-header">
       <a href="login.html" id="logo-link" class="logo-link">
         <div class="logo">
-          <span>국립강릉원주대학교</span>
+          <img src="https://www.kangwon.ac.kr/assets/ko/images/logos/logo-color.webp" alt="강원대학교" />
+          <span class="label-status campus" style="color:white;background:#F1B337" aria-label="원주">원주</span>
           <strong>간호학과 성적 관리</strong>
         </div>
       </a>
@@ -22,9 +24,8 @@
 
     <section class="hero">
       <div class="hero-content">
-        <p class="hero-kicker">PASSWORD RESET</p>
-        <h1>비밀번호 초기화 요청</h1>
-        <p>아이디와 비밀번호를 전달받을 이메일을 입력하세요.</p>
+        <h1 class="page-main-title">비밀번호 초기화 요청</h1>
+        <p class="page-description">가입 시 사용한 이메일을 입력하세요.</p>
       </div>
     </section>
 
@@ -32,12 +33,8 @@
       <section class="panel auth-panel">
         <form id="reset-request-form" class="auth-form">
           <label>
-            아이디
-            <input type="text" id="reset-username" name="username" required autocomplete="username" placeholder="아이디 입력" />
-          </label>
-          <label>
             이메일
-            <input type="email" id="reset-email" name="email" required placeholder="example@email.com" />
+            <input type="email" id="reset-email" name="email" required autocomplete="email" placeholder="example@email.com" />
           </label>
           <div class="auth-form-actions">
             <button type="submit" class="primary">요청하기</button>
@@ -53,11 +50,13 @@
     </main>
 
     <footer class="site-footer">
-      © 국립강릉원주대학교 간호학과 – 학사행정 전용 도구
+      © 강원대학교 간호학과 - 학사행정 전용 도구
     </footer>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script src="config.js"></script>
+  <script src="js/db-utils.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/notify-request.js"></script>
   <script src="js/reset-request.js"></script>

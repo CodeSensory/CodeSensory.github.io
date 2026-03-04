@@ -25,10 +25,7 @@ async function fetchGrades() {
   statusEl.textContent = '데이터를 불러오는 중...';
 
   try {
-    const { data, error } = await supabase
-      .from('student_grades')
-      .select('*')
-      .order('student_id', { ascending: true });
+    const { data, error } = await DB_UTILS.fetchAllGrades({ orderBy: 'student_id', ascending: true });
 
     if (error) throw error;
 
@@ -259,11 +256,11 @@ function renderLevelTable(levelId, levelName, filteredData, totalCount) {
 
   tbody.innerHTML = groupedRows.map((row, rowIndex) => {
     const rowStyle = row.isNewGroup 
-      ? `style="border-top: 3px solid #ff8000;"` 
+      ? `style="border-top: 3px solid #003d7a;"` 
       : '';
     
     const subjectNameStyle = row.isFirstInGroup && row.subjectName && row.subjectName !== '-'
-      ? `style="font-weight: 700; color: #ff8000;"`
+      ? `style="font-weight: 700; color: #003d7a;"`
       : '';
     
     const highIds = highIdsStr(row);

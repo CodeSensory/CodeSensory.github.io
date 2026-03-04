@@ -1,5 +1,3 @@
-const USERS_TABLE = 'app_users';
-
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('login-form');
   const statusEl = document.getElementById('login-status');
@@ -19,11 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     statusEl.style.color = '';
 
     try {
-      const { data: user, error } = await supabase
-        .from(USERS_TABLE)
-        .select('id, username, password_hash, salt, name, title, approved, is_admin')
-        .eq('username', username)
-        .maybeSingle();
+      const { data: user, error } = await DB_UTILS.users.fetchByUsername(username);
 
       if (error) throw error;
       if (!user) {

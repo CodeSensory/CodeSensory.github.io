@@ -4,64 +4,49 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>일시정지 안내 - 간호학과 성적 관리</title>
+  <title>간호학과 성적 관리</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 
 <body>
-  <div class="page-shell">
-    <header class="site-header auth-header">
-      <div class="logo-link">
-        <div class="logo">
-          <span>국립강릉원주대학교</span>
-          <strong>간호학과 성적 관리</strong>
-        </div>
-      </div>
-    </header>
-
-    <section class="hero">
-      <div class="hero-content">
-        <p class="hero-kicker">NOTICE</p>
-        <h1>웹페이지 오류로 인한 일시정지 안내</h1>
-      </div>
-    </section>
-
-    <main class="content-grid">
-      <section class="panel auth-panel" style="max-width: 800px; margin: 0 auto;">
-        <div style="padding: 40px 20px;">
-          <p style="font-size: 16px; line-height: 1.8; color: var(--text-secondary); margin-bottom: 30px;">
-            서비스에서 제공중인 데이터베이스 서버 불안정과 데이터 일부 소실이 확인되어, 
-          </p>
-          <p style="font-size: 16px; line-height: 1.8; color: var(--text-secondary); margin-bottom: 30px;">
-            데이터베이스 이전 작업을 다음 기간에 진행하고자 합니다.
-          </p>
-
-          <div style="background: var(--bg-secondary); padding: 30px; border-radius: 8px; margin-bottom: 30px;">
-            <ul style="list-style: none; padding: 0; margin: 0;">
-              <li style="padding: 15px 0; border-bottom: 1px solid var(--border-color);">
-                <strong style="color: var(--text-primary); display: block; margin-bottom: 5px;">데이터 소실 확인</strong>
-                <span style="color: var(--text-secondary);">2026년 03월 03일 오전 11:00</span>
-              </li>
-              <li style="padding: 15px 0;">
-                <strong style="color: var(--text-primary); display: block; margin-bottom: 5px;">데이터베이스 이전 작업</strong>
-                <span style="color: var(--text-secondary);">2026년 03월 03일 오후 16:00 ~ 2026년 03월 06일 12:00</span>
-              </li>
-            </ul>
-          </div>
-
-          <div style="text-align: center; padding-top: 20px; border-top: 1px solid var(--border-color);">
-            <p style="font-size: 14px; color: var(--text-muted); margin: 0;">
-              문의사항은 <a href="mailto:codesensory@gmail.com" style="color: var(--mclaren-orange); text-decoration: none; font-weight: 500;">codesensory@gmail.com</a>으로 연락 주시면 답변 드리도록 하겠습니다.
-            </p>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <footer class="site-footer">
-      © 국립강릉원주대학교 간호학과 – 학사행정 전용 도구
-    </footer>
-  </div>
+  <p style="padding: 20px;">이동 중...</p>
+  <script src="config.js"></script>
+  <script src="js/db-utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    // 스크립트가 모두 로드된 후 리다이렉트
+    (function() {
+      // 현재 페이지가 index.html인지 확인
+      var currentPage = window.location.pathname.split('/').pop() || 'index.html';
+      if (currentPage !== 'index.html' && currentPage !== '') {
+        return; // index.html이 아니면 리다이렉트하지 않음
+      }
+      
+      function redirect() {
+        // Auth 객체가 로드되었는지 확인
+        if (typeof Auth !== 'undefined' && typeof Auth.getSession === 'function') {
+          var session = Auth.getSession();
+          if (session) {
+            window.location.href = 'view.html';
+          } else {
+            window.location.href = 'login.html';
+          }
+        } else {
+          // Auth 객체가 아직 로드되지 않았으면 재시도
+          setTimeout(redirect, 50);
+        }
+      }
+      
+      // DOM이 로드된 후 실행
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', redirect);
+      } else {
+        redirect();
+      }
+    })();
+  </script>
 </body>
 
 </html>

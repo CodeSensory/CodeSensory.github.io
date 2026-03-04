@@ -1,50 +1,7 @@
 (function () {
   let currentStudentData = null; // 검색된 학생 원본 데이터 (student_grades row)
 
-  // 재시험 페이지 전용: 표시용 점수 (맨 앞 숫자만, 중첩 괄호 대응)
-  function getDisplayScore(value) {
-    if (value === null || value === undefined || value === '') return '-';
-    const m = String(value).match(/^\d+(?:\.\d+)?/);
-    return m ? m[0] : '-';
-  }
-
-  // 저장된 점수 값 파싱 → 모달 pre-fill용 { score, year, subjectName }
-  function parseScoreForRetake(value) {
-    const out = { score: '', year: '', subjectName: '' };
-    if (value === null || value === undefined || value === '') return out;
-    const s = String(value).trim();
-    const numMatch = s.match(/^(\d+(?:\.\d+)?)/);
-    if (numMatch) out.score = numMatch[1];
-    const innerMatch = s.match(/^\d+(?:\.\d+)?\((.*)\)$/s);
-    if (!innerMatch) return out;
-    // 최대 3개로 분리 (연도, 과목, 이전점수) — 이전점수에 쉼표가 있을 수 있음
-    const parts = innerMatch[1].split(/\s*,\s*/, 3);
-    if (parts[0]) out.year = parts[0].trim();
-    if (parts[1]) out.subjectName = parts[1].trim();
-    return out;
-  }
-
-  // 재시험 저장 시: 점수(수강 년도, 수강 과목, 이전 점수)
-  function formatRetakeScore(score, year, subjectName, previousValue) {
-    const prev = previousValue !== null && previousValue !== undefined && previousValue !== '' ? String(previousValue) : '';
-    if (!prev) return `${score}(${year}, ${subjectName})`;
-    return `${score}(${year}, ${subjectName}, ${prev})`;
-  }
-
-  // 표시용 성취도 (괄호 앞까지, 없으면 전체)
-  function getDisplayAchievement(value) {
-    if (value === null || value === undefined || value === '') return '-';
-    const s = String(value).trim();
-    const i = s.indexOf('(');
-    return i > 0 ? s.slice(0, i) : s;
-  }
-
-  // 재시험 저장 시: 새성취도(이전 성취도)
-  function formatRetakeAchievement(newAchievement, previousValue) {
-    const prev = previousValue !== null && previousValue !== undefined && previousValue !== '' ? String(previousValue) : '';
-    if (!prev) return newAchievement;
-    return `${newAchievement}(${prev})`;
-  }
+  // 공통 유틸리티 함수는 config.js에서 가져옴
 
   function setStatus(msg, isError) {
     const el = document.getElementById('retake-status');
@@ -179,11 +136,7 @@
     hideSelectStudentModal();
     try {
       // 1) 학번으로 정확히 검색
-      const { data: byId, error: errId } = await supabase
-        .from('student_grades')
-        .select('*')
-        .eq('student_id', keyword)
-        .maybeSingle();
+      const { data: byId, error: errId } = await DB_UTILS.fetchGradeByStudentId(keyword);
       if (errId) throw errId;
       if (byId) {
         showResultSection(keyword, byId);
@@ -191,11 +144,7 @@
         return;
       }
       // 2) 이름으로 검색 (포함)
-      const { data: byName, error: errName } = await supabase
-        .from('student_grades')
-        .select('*')
-        .ilike('student_name', '%' + keyword + '%')
-        .order('student_id', { ascending: true });
+      const { data: byName, error: errName } = await DB_UTILS.searchGradesByName(keyword);
       if (errName) throw errName;
       const list = byName || [];
       if (list.length === 0) {
@@ -258,13 +207,10 @@
 
     statusEl.textContent = '저장 중...';
     try {
-      const { error } = await supabase
-        .from('student_grades')
-        .update({
-          [subjectKey]: newScoreValue,
-          [achievementKey]: newAchievementValue,
-        })
-        .eq('student_id', currentStudentData.student_id);
+      const { error } = await DB_UTILS.updateGrade(currentStudentData.student_id, {
+        [subjectKey]: newScoreValue,
+        [achievementKey]: newAchievementValue,
+      });
       if (error) throw error;
       currentStudentData[subjectKey] = newScoreValue;
       currentStudentData[achievementKey] = newAchievementValue;

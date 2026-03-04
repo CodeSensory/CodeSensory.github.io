@@ -106,10 +106,13 @@
   };
 
   document.addEventListener('DOMContentLoaded', function () {
-    requireAuth();
+    // public 페이지에서는 requireAuth를 실행하지 않음
+    if (!isPublicPage()) {
+      requireAuth();
+    }
     var logoLink = document.getElementById('logo-link');
     if (logoLink) {
-      logoLink.href = getSession() ? 'view.html' : 'login.html';
+      logoLink.href = getSession() ? 'view.html' : 'index.html';
     }
   });
 })();

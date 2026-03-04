@@ -1,46 +1,7 @@
 let currentStudentData = null;
 let currentLevel = 'l1'; // 현재 선택된 레벨
 
-// 재시험 점수 여부 (괄호 안에 쉼표 2개 이상)
-function isRetakeScoreValue(value) {
-  if (value === null || value === undefined || value === '') return false;
-  const s = String(value).trim();
-  return s.includes('(') && (s.match(/,/g) || []).length >= 2;
-}
-// 재시험 달성도 여부 (괄호 포함, 예: 중(하))
-function isRetakeAchievementValue(value) {
-  if (value === null || value === undefined || value === '') return false;
-  return String(value).trim().indexOf('(') > 0;
-}
-// 해당 레벨·과목이 재시험인지 (점수 또는 달성도가 재시험 형식)
-function isSubjectRetake(data, level, index) {
-  if (!data) return false;
-  const sk = getSubjectKey(level, index);
-  const ak = getAchievementKey(level, index);
-  return isRetakeScoreValue(data[sk]) || isRetakeAchievementValue(data[ak]);
-}
-
-// 점수 셀 표시용 파싱 (일반 "점수(연도,과목)" 및 재시험 "점수(연도,과목,이전)" 모두 처리)
-function parseScoreForDisplay(value) {
-  const out = { score: '', year: '', subjectName: '' };
-  if (value === null || value === undefined || value === '') return out;
-  const s = String(value).trim();
-  const numMatch = s.match(/^(\d+(?:\.\d+)?)/);
-  if (numMatch) out.score = numMatch[1];
-  const innerMatch = s.match(/^\d+(?:\.\d+)?\((.*)\)$/s);
-  if (!innerMatch) return out;
-  const parts = innerMatch[1].split(/\s*,\s*/, 3);
-  if (parts[0]) out.year = parts[0].trim();
-  if (parts[1]) out.subjectName = parts[1].trim();
-  return out;
-}
-// 달성도 표시용 (괄호 앞까지)
-function getDisplayAchievement(value) {
-  if (value === null || value === undefined || value === '') return '';
-  const s = String(value).trim();
-  const i = s.indexOf('(');
-  return i > 0 ? s.slice(0, i) : s;
-}
+// 공통 유틸리티 함수는 config.js에서 가져옴
 
 // 재시험 해당 과목만 읽기 전용으로 설정 (현재 레벨 기준)
 function applyRetakeSubjectLocks(data) {
@@ -83,19 +44,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   
-  // 학번 입력 시 자동 검색 (debounce)
-  let searchTimeout;
-  studentIdInput.addEventListener('input', (e) => {
-    clearTimeout(searchTimeout);
-    const studentId = e.target.value.trim();
-    
-    if (studentId.length >= 3) {
-      searchTimeout = setTimeout(() => {
-        searchStudent(studentId);
-      }, 500);
+  // 학번 입력 시 자동 검색 (debounce 최적화)
+  const debouncedSearch = debounce((value) => {
+    if (value.length >= 3) {
+      searchStudent(value);
     } else {
       clearStudentData();
     }
+  }, 300);
+  
+  studentIdInput.addEventListener('input', (e) => {
+    debouncedSearch(e.target.value.trim());
   });
   
   manualForm.addEventListener('submit', handleManualSubmit);
@@ -109,6 +68,42 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('delete-student-btn').addEventListener('click', handleDeleteStudent);
   
   document.getElementById('upload-btn').addEventListener('click', handleXlsxUpload);
+  
+  // 레벨 선택에 따라 연도/과목명 입력 필드 테두리 색상 변경
+  const excelLevelSelect = document.getElementById('excel-level-select');
+  const excelYearInput = document.getElementById('excel-year-input');
+  const excelSubjectNameInput = document.getElementById('excel-subject-name-input');
+  
+  function updateExcelInputsBorder() {
+    const selectedLevel = excelLevelSelect ? excelLevelSelect.value : '';
+    const isGraduateYear = selectedLevel === 'graduate_year';
+    
+    if (excelYearInput) {
+      if (isGraduateYear) {
+        excelYearInput.style.border = '';
+        excelYearInput.required = false;
+      } else {
+        excelYearInput.style.border = '2px solid #dc3545';
+        excelYearInput.required = true;
+      }
+    }
+    
+    if (excelSubjectNameInput) {
+      if (isGraduateYear) {
+        excelSubjectNameInput.style.border = '';
+        excelSubjectNameInput.required = false;
+      } else {
+        excelSubjectNameInput.style.border = '2px solid #dc3545';
+        excelSubjectNameInput.required = true;
+      }
+    }
+  }
+  
+  if (excelLevelSelect) {
+    excelLevelSelect.addEventListener('change', updateExcelInputsBorder);
+    // 초기 상태 설정
+    updateExcelInputsBorder();
+  }
   
   // 탭 기능
   const tabButtons = document.querySelectorAll('.tab-button');
@@ -125,6 +120,11 @@ document.addEventListener('DOMContentLoaded', () => {
       // 선택된 탭 활성화
       button.classList.add('active');
       document.getElementById(`${targetTab}-tab`).classList.add('active');
+      
+      // 엑셀 탭으로 전환 시 테두리 색상 업데이트
+      if (targetTab === 'excel') {
+        updateExcelInputsBorder();
+      }
     });
   });
 });
@@ -198,11 +198,7 @@ async function searchStudent(studentId) {
   statusEl.textContent = '검색 중...';
   
   try {
-    const { data, error } = await supabase
-      .from('student_grades')
-      .select('*')
-      .eq('student_id', studentId)
-      .single();
+    const { data, error } = await DB_UTILS.fetchGradeByStudentId(studentId);
     
     if (error && error.code !== 'PGRST116') {
       throw error;
@@ -259,7 +255,7 @@ async function searchStudent(studentId) {
       // 재시험 해당 과목만 수정 불가 처리
       applyRetakeSubjectLocks(data);
       statusEl.textContent = `기존 학생 데이터를 불러왔습니다. (학번: ${data.student_id}, 레벨: ${currentLevel}) 재시험 과목은 수정할 수 없습니다.`;
-      statusEl.style.color = 'var(--mclaren-orange)';
+      statusEl.style.color = 'var(--knu-blue)';
       document.getElementById('delete-student-btn').style.display = 'block';
     } else {
       // 신규 학생
@@ -339,10 +335,7 @@ async function handleDeleteStudent() {
   statusEl.style.color = 'var(--text-secondary)';
   
   try {
-    const { error } = await supabase
-      .from('student_grades')
-      .delete()
-      .eq('student_id', studentId);
+    const { error } = await DB_UTILS.deleteGrade(studentId);
     
     if (error) throw error;
     
@@ -466,10 +459,7 @@ async function handleManualSubmit(event) {
       console.log('업데이트할 필드 개수:', Object.keys(updateData).length - 1); // student_id 제외
       
       // update로 특정 필드만 업데이트 (기존 값 유지)
-      const { data, error } = await supabase
-        .from('student_grades')
-        .update(updateData)
-        .eq('student_id', studentId);
+      const { data, error } = await DB_UTILS.updateGrade(studentId, updateData);
       
       if (error) {
         console.error('저장 오류:', error);
@@ -539,7 +529,7 @@ async function handleManualSubmit(event) {
       console.log('저장할 데이터 (신규 학생):', cleanPayload);
       console.log('저장할 필드 개수:', Object.keys(cleanPayload).length - 1); // student_id 제외
       
-      const { data, error } = await supabase.from('student_grades').insert(cleanPayload);
+      const { data, error } = await DB_UTILS.insertGrade(cleanPayload);
       
       if (error) {
         console.error('저장 오류:', error);
@@ -564,16 +554,48 @@ async function handleXlsxUpload() {
 
   if (!input.files.length) {
     statusEl.textContent = '업로드할 파일을 선택해 주세요.';
+    statusEl.style.color = 'var(--text-muted)';
     return;
   }
 
   const selectedLevel = levelSelect.value;
   if (!selectedLevel) {
     statusEl.textContent = '레벨을 선택해 주세요.';
+    statusEl.style.color = 'var(--text-muted)';
     return;
   }
 
+  // 졸업연도가 아닌 경우 연도와 과목명 필수 입력 검증
+  if (selectedLevel !== 'graduate_year') {
+    const yearInput = document.getElementById('excel-year-input');
+    const subjectNameInput = document.getElementById('excel-subject-name-input');
+    const commonYear = yearInput ? yearInput.value.trim() : '';
+    const commonSubjectName = subjectNameInput ? subjectNameInput.value.trim() : '';
+    
+    if (!commonYear || !commonSubjectName) {
+      statusEl.textContent = '연도와 과목명을 모두 입력해 주세요.';
+      statusEl.style.color = 'var(--text-muted)';
+      
+      // 입력 필드에 포커스 및 스타일 강조
+      if (!commonYear && yearInput) {
+        yearInput.focus();
+        yearInput.style.borderColor = '#dc3545';
+        setTimeout(() => {
+          yearInput.style.borderColor = '';
+        }, 3000);
+      } else if (!commonSubjectName && subjectNameInput) {
+        subjectNameInput.focus();
+        subjectNameInput.style.borderColor = '#dc3545';
+        setTimeout(() => {
+          subjectNameInput.style.borderColor = '';
+        }, 3000);
+      }
+      return;
+    }
+  }
+
   statusEl.textContent = '파일을 읽는 중...';
+  statusEl.style.color = '';
   const file = input.files[0];
   const reader = new FileReader();
 

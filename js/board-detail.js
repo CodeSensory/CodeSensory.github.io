@@ -29,10 +29,7 @@ async function fetchPostListThenDetail() {
   statusEl.textContent = '게시글을 불러오는 중입니다...';
   
   try {
-    const { data: listData, error: listError } = await supabase
-      .from(BOARD_TABLE)
-      .select('id, title, is_pinned, created_at')
-      .order('created_at', { ascending: false });
+    const { data: listData, error: listError } = await DB_UTILS.fetchAllAnnouncements({ orderBy: 'created_at', ascending: false });
     
     if (listError) throw listError;
     
@@ -40,7 +37,16 @@ async function fetchPostListThenDetail() {
       const aPinned = a.is_pinned === true ? 1 : 0;
       const bPinned = b.is_pinned === true ? 1 : 0;
       if (bPinned !== aPinned) return bPinned - aPinned;
-      return new Date(b.created_at) - new Date(a.created_at);
+      
+      // Firestore Timestamp 처리
+      const getDate = (timestamp) => {
+        if (!timestamp) return new Date(0);
+        if (timestamp.toDate) return timestamp.toDate();
+        if (timestamp instanceof Date) return timestamp;
+        return new Date(timestamp);
+      };
+      
+      return getDate(b.created_at) - getDate(a.created_at);
     });
     orderedPosts = sorted.map((p) => ({ id: String(p.id), title: p.title || '' }));
     
@@ -55,11 +61,7 @@ async function fetchPostDetail() {
   const statusEl = document.getElementById('board-status');
   
   try {
-    const { data, error } = await supabase
-      .from(BOARD_TABLE)
-      .select('*')
-      .eq('id', currentPostId)
-      .single();
+    const { data, error } = await DB_UTILS.fetchAnnouncementById(currentPostId);
     
     if (error) throw error;
     
@@ -101,7 +103,7 @@ function renderPrevNextLinks() {
   
   const prevEl = document.getElementById('board-prev-link');
   const nextEl = document.getElementById('board-next-link');
-  const escapeHtml = (s) => (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  // escapeHtml 함수는 config.js에서 제공됨
   
   if (prevEl) {
     if (prevPost) {
@@ -130,10 +132,7 @@ function renderPrevNextLinks() {
 async function incrementViewCount(post) {
   try {
     const newViews = (post.views ?? 0) + 1;
-    await supabase
-      .from(BOARD_TABLE)
-      .update({ views: newViews })
-      .eq('id', post.id);
+      await DB_UTILS.updateAnnouncement(String(post.id), { views: newViews });
   } catch (err) {
     console.error('조회수 업데이트 실패:', err);
   }
@@ -157,10 +156,7 @@ async function handleDeletePost() {
   statusEl.textContent = '게시글을 삭제하는 중입니다...';
 
   try {
-    const { error } = await supabase
-      .from(BOARD_TABLE)
-      .delete()
-      .eq('id', currentPostId);
+      const { error } = await DB_UTILS.deleteAnnouncement(currentPostId);
 
     if (error) throw error;
 
@@ -172,14 +168,7 @@ async function handleDeletePost() {
   }
 }
 
-function formatDate(dateString, includeTime = false) {
-  if (!dateString) return '-';
-  const date = new Date(dateString);
-  const options = includeTime
-    ? { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }
-    : { year: 'numeric', month: '2-digit', day: '2-digit' };
-  return date.toLocaleDateString('ko-KR', options);
-}
+// formatDate는 config.js에서 가져옴
 
 
 

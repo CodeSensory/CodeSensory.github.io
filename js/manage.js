@@ -3,13 +3,7 @@ let currentLowLevel = 'l1';
 let currentMidLevel = 'l1';
 let currentStudentIdPrefix = ''; // 학번 앞 4자리 필터 (빈 문자열 = 전체)
 
-// 재시험 형식(예: 중(하))에서 현재 달성도만 추출 — 괄호 앞까지, 없으면 전체
-function getDisplayAchievement(value) {
-  if (value === null || value === undefined || value === '') return '';
-  const s = String(value).trim();
-  const i = s.indexOf('(');
-  return i > 0 ? s.slice(0, i) : s;
-}
+// 공통 유틸리티 함수는 config.js에서 가져옴
 
 document.addEventListener('DOMContentLoaded', () => {
   // 초기 빈 테이블 렌더링
@@ -80,7 +74,7 @@ function renderLowAchievementTable(rows) {
       const achievementKey = getAchievementKey(currentLowLevel, index);
       const achievement = row.rawData[achievementKey] || '-';
       const displayAch = getDisplayAchievement(achievement);
-      // 현재 달성도가 '하'인 경우(재시험 형식 '중(하)' 등 포함) 연한 주황색 배경
+      // 현재 달성도가 '하'인 경우(재시험 형식 '중(하)' 등 포함) 연한 파란색 배경
       const cellClass = displayAch === '하' ? 'low-achievement-cell' : '';
       return `<td class="${cellClass}">${achievement}</td>`;
     }).join('');
@@ -133,7 +127,7 @@ function renderMidAchievementTable(rows) {
       const achievementKey = getAchievementKey(currentMidLevel, index);
       const achievement = row.rawData[achievementKey] || '-';
       const displayAch = getDisplayAchievement(achievement);
-      // 현재 달성도가 '중' 또는 '하'인 경우(재시험 형식 포함) 연한 주황색 배경
+      // 현재 달성도가 '중' 또는 '하'인 경우(재시험 형식 포함) 연한 파란색 배경
       const cellClass = (displayAch === '중' || displayAch === '하') ? 'low-achievement-cell' : '';
       return `<td class="${cellClass}">${achievement}</td>`;
     }).join('');
@@ -205,10 +199,7 @@ async function fetchAllRows() {
   
   try {
     console.log('데이터를 불러오는 중...');
-    const { data, error } = await supabase
-      .from('student_grades')
-      .select('*')
-      .order('student_id', { ascending: true });
+    const { data, error } = await DB_UTILS.fetchAllGrades({ orderBy: 'student_id', ascending: true });
 
     if (error) {
       console.error('Supabase 오류:', error);

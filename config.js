@@ -1,14 +1,22 @@
-// Supabase 클라이언트 초기화 설정
-// 실제 프로젝트 값을 입력한 뒤 사용하세요.
-const SUPABASE_URL = 'https://pyidizfnrnoqplclekun.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_3rPJ17sh_tLWavZbMSx2DA_Kay-hUiq';
+// Firebase/Firestore 클라이언트 초기화 설정
+// Firebase Console에서 프로젝트 설정 정보를 가져와 입력하세요.
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Firebase 설정 정보 (Firebase Console에서 복사)
+const firebaseConfig = {
+  apiKey: "AIzaSyDI_xD4eNpB9mvmOxc5Lz16ntkIxxf28gk",
+  authDomain: "knu-nursing.firebaseapp.com",
+  projectId: "knu-nursing",
+  storageBucket: "knu-nursing.firebasestorage.app",
+  messagingSenderId: "797360869409",
+  appId: "1:797360869409:web:2c9963bae01ac6d9e05360"
+};
 
-// Edge Function 호출용 (요청 알림 이메일 등)
-if (typeof window !== 'undefined') {
-  window.SUPABASE_URL = SUPABASE_URL;
-  window.SUPABASE_ANON_KEY = SUPABASE_ANON_KEY;
+// Firebase 초기화 (compat 모드 사용)
+if (typeof firebase !== 'undefined') {
+  firebase.initializeApp(firebaseConfig);
+  window.db = firebase.firestore();
+} else {
+  console.error('Firebase SDK가 로드되지 않았습니다. HTML 파일에 Firebase SDK 스크립트를 추가하세요.');
 }
 
 // 레벨 정의
@@ -92,7 +100,7 @@ function getSubjectNumberByName(subjectName) {
   return null;
 }
 
-// 공통 유틸: 폼 데이터를 Supabase 컬럼 구조로 변환 (레벨별)
+// 공통 유틸: 폼 데이터를 Firestore 컬럼 구조로 변환 (레벨별)
 function buildGradePayload({ studentId, level, subjects, achievements = null, note = null }) {
   const payload = {
     student_id: studentId,
@@ -117,37 +125,368 @@ function buildGradePayload({ studentId, level, subjects, achievements = null, no
   return payload;
 }
 
-// 공통 유틸: Supabase row를 화면용 데이터로 변환 (레벨별)
-function normalizeGradeRow(row, level = 'l1') {
+// 공통 유틸: Firestore 문서를 화면용 데이터로 변환 (레벨별)
+function normalizeGradeRow(doc, level = 'l1') {
+  // doc가 이미 일반 객체인지 확인 (Firestore 문서 객체가 아닌 경우)
+  let data, docId;
+  if (doc && typeof doc.data === 'function') {
+    // Firestore 문서 객체인 경우
+    data = doc.data();
+    docId = doc.id;
+  } else {
+    // 이미 일반 객체로 변환된 경우
+    data = doc;
+    docId = doc.id || doc.student_id;
+  }
+  
   const subjectKeys = getSubjectKeysForLevel(level);
+  
+  // updated_at이 Timestamp인 경우 Date로 변환
+  let updatedAt = data.updated_at;
+  if (updatedAt && typeof updatedAt.toDate === 'function') {
+    updatedAt = updatedAt.toDate();
+  }
+  
   return {
-    id: row.id,
-    student_id: row.student_id,
-    subjects: subjectKeys.map((key) => row[key]),
-    note: row[NOTE_FIELD] || null,
-    updated_at: row.updated_at,
+    id: docId,
+    student_id: data.student_id,
+    subjects: subjectKeys.map((key) => data[key]),
+    note: data[NOTE_FIELD] || null,
+    updated_at: updatedAt || null,
   };
 }
 
 // 모든 레벨의 성적을 포함한 정규화 (학번 검색 시 사용)
-function normalizeGradeRowAllLevels(row) {
+function normalizeGradeRowAllLevels(doc) {
+  // doc가 이미 일반 객체인지 확인 (Firestore 문서 객체가 아닌 경우)
+  let data, docId;
+  if (doc && typeof doc.data === 'function') {
+    // Firestore 문서 객체인 경우
+    data = doc.data();
+    docId = doc.id;
+  } else {
+    // 이미 일반 객체로 변환된 경우
+    data = doc;
+    docId = doc.id || doc.student_id;
+  }
+  
+  // updated_at이 Timestamp인 경우 Date로 변환
+  let updatedAt = data.updated_at;
+  if (updatedAt && typeof updatedAt.toDate === 'function') {
+    updatedAt = updatedAt.toDate();
+  }
+  
   return {
-    id: row.id,
-    student_id: row.student_id,
+    id: docId,
+    student_id: data.student_id,
     l1: {
-      subjects: getSubjectKeysForLevel('l1').map((key) => row[key]),
-      achievements: getAchievementKeysForLevel('l1').map((key) => row[key]),
+      subjects: getSubjectKeysForLevel('l1').map((key) => data[key]),
+      achievements: getAchievementKeysForLevel('l1').map((key) => data[key]),
     },
     l2: {
-      subjects: getSubjectKeysForLevel('l2').map((key) => row[key]),
-      achievements: getAchievementKeysForLevel('l2').map((key) => row[key]),
+      subjects: getSubjectKeysForLevel('l2').map((key) => data[key]),
+      achievements: getAchievementKeysForLevel('l2').map((key) => data[key]),
     },
     l3: {
-      subjects: getSubjectKeysForLevel('l3').map((key) => row[key]),
-      achievements: getAchievementKeysForLevel('l3').map((key) => row[key]),
+      subjects: getSubjectKeysForLevel('l3').map((key) => data[key]),
+      achievements: getAchievementKeysForLevel('l3').map((key) => data[key]),
     },
-    note: row[NOTE_FIELD] || null,
-    updated_at: row.updated_at,
+    note: data[NOTE_FIELD] || null,
+    updated_at: updatedAt || null,
   };
 }
 
+// ========== 공통 유틸리티 함수 (점수 파싱 및 표시) ==========
+
+/**
+ * 점수 값에서 숫자만 추출 (예: "85(2024, 기본간호)" -> "85")
+ * @param {string|number|null} value - 점수 값
+ * @returns {string} 추출된 점수 문자열 또는 '-'
+ */
+function extractScore(value) {
+  if (value === null || value === undefined || value === '') return '-';
+  const strValue = String(value);
+  const match = strValue.match(/^(\d+(?:\.\d+)?)/);
+  return match ? match[1] : '-';
+}
+
+/**
+ * 점수 표시용 (재시험 페이지 등에서 사용)
+ * @param {string|number|null} value - 점수 값
+ * @returns {string} 표시용 점수 문자열
+ */
+function getDisplayScore(value) {
+  return extractScore(value);
+}
+
+/**
+ * 점수 셀 표시용 파싱 (일반 "점수(연도,과목)" 및 재시험 "점수(연도,과목,이전)" 모두 처리)
+ * @param {string|number|null} value - 점수 값
+ * @returns {{score: string, year: string, subjectName: string}} 파싱된 객체
+ */
+function parseScoreForDisplay(value) {
+  const out = { score: '', year: '', subjectName: '' };
+  if (value === null || value === undefined || value === '') return out;
+  const s = String(value).trim();
+  const numMatch = s.match(/^(\d+(?:\.\d+)?)/);
+  if (numMatch) out.score = numMatch[1];
+  const innerMatch = s.match(/^\d+(?:\.\d+)?\((.*)\)$/s);
+  if (!innerMatch) return out;
+  const parts = innerMatch[1].split(/\s*,\s*/, 3);
+  if (parts[0]) out.year = parts[0].trim();
+  if (parts[1]) out.subjectName = parts[1].trim();
+  return out;
+}
+
+/**
+ * 재시험 점수 파싱 (모달 pre-fill용)
+ * @param {string|number|null} value - 점수 값
+ * @returns {{score: string, year: string, subjectName: string}} 파싱된 객체
+ */
+function parseScoreForRetake(value) {
+  const out = { score: '', year: '', subjectName: '' };
+  if (value === null || value === undefined || value === '') return out;
+  const s = String(value).trim();
+  const numMatch = s.match(/^(\d+(?:\.\d+)?)/);
+  if (numMatch) out.score = numMatch[1];
+  const innerMatch = s.match(/^\d+(?:\.\d+)?\((.*)\)$/s);
+  if (!innerMatch) return out;
+  const parts = innerMatch[1].split(/\s*,\s*/, 3);
+  if (parts[0]) out.year = parts[0].trim();
+  if (parts[1]) out.subjectName = parts[1].trim();
+  return out;
+}
+
+/**
+ * 재시험 점수 여부 확인 (괄호 안에 쉼표 2개 이상)
+ * @param {string|number|null} value - 점수 값
+ * @returns {boolean} 재시험 여부
+ */
+function isRetakeScore(value) {
+  if (value === null || value === undefined || value === '') return false;
+  const s = String(value).trim();
+  if (!s.includes('(') || !s.includes(')')) return false;
+  return (s.match(/,/g) || []).length >= 2;
+}
+
+/**
+ * 재시험 달성도 여부 확인 (괄호 포함, 예: 중(하))
+ * @param {string|null} value - 달성도 값
+ * @returns {boolean} 재시험 여부
+ */
+function isRetakeAchievement(value) {
+  if (value === null || value === undefined || value === '') return false;
+  return String(value).trim().indexOf('(') > 0;
+}
+
+/**
+ * 달성도 표시용 (괄호 앞까지)
+ * @param {string|null} value - 달성도 값
+ * @returns {string} 표시용 달성도
+ */
+function getDisplayAchievement(value) {
+  if (value === null || value === undefined || value === '') return '';
+  const s = String(value).trim();
+  const i = s.indexOf('(');
+  return i > 0 ? s.slice(0, i) : s;
+}
+
+/**
+ * 재시험 형식에서 이전 점수 추출
+ * @param {string|number|null} value - 점수 값
+ * @returns {string} 이전 점수
+ */
+function getPreviousScore(value) {
+  if (!value || !isRetakeScore(value)) return '';
+  const s = String(value).trim();
+  const innerMatch = s.match(/^\d+(?:\.\d+)?\((.*)\)$/s);
+  if (!innerMatch) return '';
+  const parts = innerMatch[1].split(/\s*,\s*/, 3);
+  if (parts.length < 3) return '';
+  const prevPart = parts[2].trim();
+  const numMatch = prevPart.match(/^\d+(?:\.\d+)?/);
+  return numMatch ? numMatch[0] : '';
+}
+
+/**
+ * 재시험 형식에서 이전 달성도 추출
+ * @param {string|null} value - 달성도 값
+ * @returns {string} 이전 달성도
+ */
+function getPreviousAchievement(value) {
+  if (value === null || value === undefined || value === '') return '';
+  const s = String(value).trim();
+  const i = s.indexOf('(');
+  if (i < 0) return '';
+  const inner = s.slice(i + 1).replace(/\)+$/, '').trim();
+  return inner || '';
+}
+
+/**
+ * 점수와 달성도를 "점수(달성도)" 형식으로 포맷
+ * @param {string|number|null} rawScore - 원본 점수 값
+ * @param {string|null} rawAchievement - 원본 달성도 값
+ * @returns {string} 포맷된 문자열
+ */
+function formatScoreCell(rawScore, rawAchievement) {
+  const currScore = extractScore(rawScore);
+  const currAch = getDisplayAchievement(rawAchievement);
+  const hasRetakeScore = isRetakeScore(rawScore);
+  const hasRetakeAch = isRetakeAchievement(rawAchievement);
+  const isRetake = hasRetakeScore || hasRetakeAch;
+
+  const currStr = currScore !== '-' && currAch ? `${currScore}(${currAch})` : (currScore !== '-' ? currScore : (currAch || '-'));
+  if (currStr === '-') return '-';
+  if (!isRetake) return currStr;
+
+  const prevScore = getPreviousScore(rawScore);
+  const prevAch = getPreviousAchievement(rawAchievement);
+  const prevStr = prevScore && prevAch ? `${prevScore}(${prevAch})` : (prevScore || prevAch || '');
+  if (prevStr && currStr) {
+    return `${prevStr} → <span class="retake-list-current">${currStr}</span>`;
+  }
+  return currStr;
+}
+
+/**
+ * 점수 셀 HTML 생성 (재시험이면 빨간색 클래스 적용)
+ * @param {string|number|null} rawValue - 원본 점수 값
+ * @param {string} displayValue - 표시할 값
+ * @returns {string} HTML 문자열
+ */
+function scoreCellHtml(rawValue, displayValue) {
+  const text = displayValue !== undefined && displayValue !== '' ? displayValue : '-';
+  if (isRetakeScore(rawValue)) {
+    return `<span class="retake-score">${text}</span>`;
+  }
+  return text;
+}
+
+/**
+ * 재시험 저장 시 점수 포맷: 점수(수강 년도, 수강 과목, 이전 점수)
+ * @param {string|number} score - 새 점수
+ * @param {string} year - 수강 년도
+ * @param {string} subjectName - 수강 과목
+ * @param {string|number|null} previousValue - 이전 점수 값
+ * @returns {string} 포맷된 점수 문자열
+ */
+function formatRetakeScore(score, year, subjectName, previousValue) {
+  const prev = previousValue !== null && previousValue !== undefined && previousValue !== '' ? String(previousValue) : '';
+  if (!prev) return `${score}(${year}, ${subjectName})`;
+  return `${score}(${year}, ${subjectName}, ${prev})`;
+}
+
+/**
+ * 재시험 저장 시 달성도 포맷: 새성취도(이전 성취도)
+ * @param {string} newAchievement - 새 달성도
+ * @param {string|null} previousValue - 이전 달성도 값
+ * @returns {string} 포맷된 달성도 문자열
+ */
+function formatRetakeAchievement(newAchievement, previousValue) {
+  const prev = previousValue !== null && previousValue !== undefined && previousValue !== '' ? String(previousValue) : '';
+  if (!prev) return newAchievement;
+  return `${newAchievement}(${prev})`;
+}
+
+/**
+ * 해당 레벨·과목이 재시험인지 확인 (점수 또는 달성도가 재시험 형식)
+ * @param {object} data - 학생 데이터 객체
+ * @param {string} level - 레벨 ('l1', 'l2', 'l3')
+ * @param {number} index - 과목 인덱스 (0-17)
+ * @returns {boolean} 재시험 여부
+ */
+function isSubjectRetake(data, level, index) {
+  if (!data) return false;
+  const sk = getSubjectKey(level, index);
+  const ak = getAchievementKey(level, index);
+  return isRetakeScore(data[sk]) || isRetakeAchievement(data[ak]);
+}
+
+/**
+ * 날짜 포맷팅
+ * @param {Date|Timestamp|string} dateValue - 날짜 값
+ * @param {boolean} includeTime - 시간 포함 여부
+ * @returns {string} 포맷된 날짜 문자열
+ */
+function formatDate(dateValue, includeTime = false) {
+  if (!dateValue) return '-';
+  let date;
+  if (dateValue instanceof Date) {
+    date = dateValue;
+  } else if (dateValue && typeof dateValue.toDate === 'function') {
+    // Firestore Timestamp
+    date = dateValue.toDate();
+  } else if (typeof dateValue === 'string') {
+    date = new Date(dateValue);
+  } else {
+    return '-';
+  }
+  
+  if (isNaN(date.getTime())) return '-';
+  
+  const options = includeTime
+    ? { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }
+    : { year: 'numeric', month: '2-digit', day: '2-digit' };
+  return date.toLocaleDateString('ko-KR', options);
+}
+
+/**
+ * 콘텐츠 포맷팅 (HTML 이스케이프 및 줄바꿈 처리)
+ * @param {string} content - 원본 콘텐츠
+ * @returns {string} 포맷된 HTML 문자열
+ */
+function formatContent(content) {
+  if (!content) return '';
+  const escaped = content
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  return escaped.replace(/\n/g, '<br />');
+}
+
+/**
+ * HTML 이스케이프 (XSS 방지)
+ * @param {string} str - 이스케이프할 문자열
+ * @returns {string} 이스케이프된 문자열
+ */
+function escapeHtml(str) {
+  if (str == null) return '';
+  const div = document.createElement('div');
+  div.textContent = String(str);
+  return div.innerHTML;
+}
+
+/**
+ * 디바운스 함수 (성능 최적화)
+ * @param {Function} func - 실행할 함수
+ * @param {number} wait - 대기 시간 (ms)
+ * @returns {Function} 디바운스된 함수
+ */
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+/**
+ * 쓰로틀 함수 (성능 최적화)
+ * @param {Function} func - 실행할 함수
+ * @param {number} limit - 제한 시간 (ms)
+ * @returns {Function} 쓰로틀된 함수
+ */
+function throttle(func, limit) {
+  let inThrottle;
+  return function(...args) {
+    if (!inThrottle) {
+      func.apply(this, args);
+      inThrottle = true;
+      setTimeout(() => inThrottle = false, limit);
+    }
+  };
+}

@@ -69,18 +69,23 @@ async function fetchBoardPosts() {
   statusEl.textContent = '게시글을 불러오는 중입니다...';
 
   try {
-    const { data, error } = await supabase
-      .from(BOARD_TABLE)
-      .select('*')
-      .order('created_at', { ascending: false });
+    const { data, error } = await DB_UTILS.fetchAllAnnouncements({ orderBy: 'created_at', ascending: false });
 
     if (error) throw error;
 
+    // Firestore Timestamp 처리
+    const getDate = (timestamp) => {
+      if (!timestamp) return new Date(0);
+      if (timestamp.toDate) return timestamp.toDate();
+      if (timestamp instanceof Date) return timestamp;
+      return new Date(timestamp);
+    };
+    
     boardPosts = (data || []).sort((a, b) => {
       const aPinned = a.is_pinned === true ? 1 : 0;
       const bPinned = b.is_pinned === true ? 1 : 0;
       if (bPinned !== aPinned) return bPinned - aPinned;
-      return new Date(b.created_at) - new Date(a.created_at);
+      return getDate(b.created_at) - getDate(a.created_at);
     });
     filteredPosts = [...boardPosts];
     currentPage = 1;
@@ -132,7 +137,13 @@ function renderBoardTable() {
   const paginatedRows = filteredPosts.slice(startIndex, startIndex + PAGE_SIZE);
 
   // 오래된 글이 1번이 되도록: created_at 오름차순으로 1,2,3,... 부여 후 매핑
-  const byCreatedAsc = [...filteredPosts].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+  const getDate = (timestamp) => {
+    if (!timestamp) return new Date(0);
+    if (timestamp.toDate) return timestamp.toDate();
+    if (timestamp instanceof Date) return timestamp;
+    return new Date(timestamp);
+  };
+  const byCreatedAsc = [...filteredPosts].sort((a, b) => getDate(a.created_at) - getDate(b.created_at));
   const postNumberMap = new Map();
   byCreatedAsc.forEach((p, i) => postNumberMap.set(p.id, i + 1));
 
@@ -167,21 +178,5 @@ function renderBoardTable() {
 }
 
 
-function formatDate(dateString, includeTime = false) {
-  if (!dateString) return '-';
-  const date = new Date(dateString);
-  const options = includeTime
-    ? { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }
-    : { year: 'numeric', month: '2-digit', day: '2-digit' };
-  return date.toLocaleDateString('ko-KR', options);
-}
-
-function formatContent(content) {
-  if (!content) return '';
-  const escaped = content
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-  return escaped.replace(/\n/g, '<br />');
-}
+// formatDate와 formatContent 함수는 config.js에서 제공됨
 

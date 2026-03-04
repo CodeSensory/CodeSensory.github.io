@@ -1,6 +1,3 @@
-const USERS_TABLE = 'app_users';
-const RESET_TABLE = 'password_reset_requests';
-
 document.addEventListener('DOMContentLoaded', () => {
   const session = Auth.getSession();
   if (!session || !session.is_admin) {
@@ -23,11 +20,7 @@ async function loadPendingRequests() {
   emptyEl.style.display = 'none';
 
   try {
-    const { data: rows, error } = await supabase
-      .from(USERS_TABLE)
-      .select('id, username, name, title, created_at')
-      .eq('approved', false)
-      .order('created_at', { ascending: true });
+    const { data: rows, error } = await DB_UTILS.users.fetchPendingApprovals();
 
     if (error) throw error;
 
@@ -40,9 +33,7 @@ async function loadPendingRequests() {
 
     tbody.innerHTML = rows
       .map((row) => {
-        const dateStr = row.created_at
-          ? new Date(row.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
-          : '-';
+        const dateStr = formatDate(row.created_at, true);
         return `
           <tr data-id="${row.id}">
             <td>${escapeHtml(row.username || '')}</td>
@@ -77,12 +68,29 @@ async function approveRequest(userId) {
   statusEl.style.color = '';
 
   try {
-    const { error } = await supabase
-      .from(USERS_TABLE)
-      .update({ approved: true })
-      .eq('id', userId);
+    // 먼저 사용자 정보 가져오기
+    const { data: userData, error: fetchError } = await DB_UTILS.users.fetchById(userId);
+    if (fetchError) throw fetchError;
+    if (!userData) {
+      throw new Error('사용자 정보를 찾을 수 없습니다.');
+    }
+
+    const { error } = await DB_UTILS.users.update(userId, { approved: true });
 
     if (error) throw error;
+
+    // 사용자에게 승인 완료 이메일 발송
+    if (typeof sendUserEmail === 'function') {
+      const userEmail = userData.email || userData.username;
+      if (userEmail) {
+        sendUserEmail({
+          type: 'signup_approved',
+          to_email: userEmail,
+          username: userData.username || userEmail,
+          name: userData.name || ''
+        });
+      }
+    }
 
     statusEl.textContent = '승인되었습니다.';
     statusEl.style.color = '';
@@ -101,10 +109,7 @@ async function deleteRequest(userId) {
   statusEl.style.color = '';
 
   try {
-    const { error } = await supabase
-      .from(USERS_TABLE)
-      .delete()
-      .eq('id', userId);
+    const { error } = await DB_UTILS.users.delete(userId);
 
     if (error) throw error;
 
@@ -131,10 +136,8 @@ async function loadResetRequests() {
   emptyEl.style.display = 'none';
 
   try {
-    const { data: rows, error } = await supabase
-      .from(RESET_TABLE)
-      .select('id, username, email, created_at, approved, used')
-      .order('created_at', { ascending: false });
+    // 비밀번호 재설정 요청 조회
+    const { data: rows, error } = await DB_UTILS.fetchAllResetRequests();
 
     if (error) throw error;
 
@@ -147,9 +150,7 @@ async function loadResetRequests() {
 
     tbody.innerHTML = rows
       .map((row) => {
-        const dateStr = row.created_at
-          ? new Date(row.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
-          : '-';
+        const dateStr = formatDate(row.created_at, true);
         let statusStr = '대기';
         if (row.used === true) statusStr = '비밀번호 변경 완료';
         else if (row.approved === true) statusStr = '승인됨 (재설정 대기)';
@@ -190,10 +191,7 @@ async function deleteResetRequest(requestId) {
   statusEl.style.color = '';
 
   try {
-    const { error } = await supabase
-      .from(RESET_TABLE)
-      .delete()
-      .eq('id', requestId);
+    const { error } = await DB_UTILS.deletePasswordResetRequest(requestId);
 
     if (error) throw error;
 
@@ -213,12 +211,25 @@ async function approveResetRequest(requestId) {
   statusEl.style.color = '';
 
   try {
-    const { error } = await supabase
-      .from(RESET_TABLE)
-      .update({ approved: true })
-      .eq('id', requestId);
+    // 먼저 요청 정보 가져오기
+    const { data: requestData, error: fetchError } = await DB_UTILS.fetchPasswordResetRequestById(requestId);
+    if (fetchError) throw fetchError;
+    if (!requestData) {
+      throw new Error('요청 정보를 찾을 수 없습니다.');
+    }
+
+    const { error } = await DB_UTILS.updatePasswordResetRequest(requestId, { approved: true });
 
     if (error) throw error;
+
+    // 사용자에게 승인 완료 이메일 발송
+    if (typeof sendUserEmail === 'function' && requestData.email) {
+      sendUserEmail({
+        type: 'password_reset_approved',
+        to_email: requestData.email,
+        username: requestData.username || requestData.email
+      });
+    }
 
     statusEl.textContent = '비밀번호 초기화 요청이 승인되었습니다.';
     statusEl.style.color = '';
@@ -230,8 +241,4 @@ async function approveResetRequest(requestId) {
   }
 }
 
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
+// escapeHtml 함수는 config.js에서 제공됨

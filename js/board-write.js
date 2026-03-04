@@ -49,7 +49,7 @@ async function handleCreatePost(event) {
   }
 
   try {
-    const { data, error } = await supabase.from(BOARD_TABLE).insert({
+    const { data, error } = await DB_UTILS.insertAnnouncement({
       title,
       author,
       content,

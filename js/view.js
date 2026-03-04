@@ -5,129 +5,135 @@ let allGradeData = []; // 원본 데이터 보관 (달성도 포함)
 let selectedRowForEdit = null; // 수정할 행 데이터
 let currentLevel = 'l1'; // 현재 선택된 레벨
 
-// 성적에서 점수만 추출 ("점수(연도, 과목명)" 또는 재시험 "점수(연도, 과목, 이전점수)" 형식에서 맨 앞 점수만 반환)
-function extractScore(value) {
-  if (value === null || value === undefined || value === '') {
-    return '-';
-  }
-  const strValue = String(value);
-  const match = strValue.match(/^(\d+(?:\.\d+)?)/);
-  if (match) {
-    return match[1];
-  }
-  return strValue;
-}
-
-// 재시험 점수 여부 (점수(수강 년도, 수강 과목, 이전 점수) 형식 → 괄호 안에 쉼표가 2개 이상)
-function isRetakeScore(value) {
-  if (value === null || value === undefined || value === '') return false;
-  const s = String(value).trim();
-  if (!s.includes('(') || !s.includes(')')) return false;
-  return (s.match(/,/g) || []).length >= 2;
-}
-
-// 점수 표시 HTML (재시험이면 빨간색 클래스 적용)
-function scoreCellHtml(rawValue, displayValue) {
-  const text = displayValue !== undefined && displayValue !== '' ? displayValue : '-';
-  if (isRetakeScore(rawValue)) {
-    return `<span class="retake-score">${text}</span>`;
-  }
-  return text;
-}
+// 공통 유틸리티 함수는 config.js에서 가져옴
 
 document.addEventListener('DOMContentLoaded', () => {
+  // DOM 요소 캐싱 (성능 최적화)
+  const elements = {
+    levelSelect: document.getElementById('level-select'),
+    refreshBtn: document.getElementById('refresh-btn'),
+    searchInput: document.getElementById('search-student'),
+    searchBtn: document.getElementById('search-btn'),
+    searchResultContainer: document.getElementById('search-result-container'),
+    gradesTableContainer: document.querySelector('#grades-table')?.closest('.table-container'),
+    viewStatus: document.getElementById('view-status'),
+    selectAllBtn: document.getElementById('select-all-btn'),
+    deselectAllBtn: document.getElementById('deselect-all-btn'),
+    editGradeForm: document.getElementById('edit-grade-form'),
+    cancelEditBtn: document.getElementById('cancel-edit-btn'),
+    subjectCheckboxes: document.getElementById('subject-checkboxes')
+  };
+
   renderSubjectCheckboxes();
   renderTableHeader();
   fetchGrades();
 
   // 레벨 선택 변경 이벤트
-  const levelSelect = document.getElementById('level-select');
-  levelSelect.addEventListener('change', (e) => {
-    currentLevel = e.target.value;
-    renderTableHeader();
-    if (currentSearchKeyword) {
-      const filtered = filterGrades(currentSearchKeyword);
-      renderSearchResultTable(filtered);
-    } else {
-      renderTableBody(gradeRows);
-    }
-  });
+  if (elements.levelSelect) {
+    elements.levelSelect.addEventListener('change', (e) => {
+      currentLevel = e.target.value;
+      renderTableHeader();
+      if (currentSearchKeyword) {
+        const filtered = filterGrades(currentSearchKeyword);
+        renderSearchResultTable(filtered);
+      } else {
+        renderTableBody(gradeRows);
+      }
+    });
+  }
 
-  document.getElementById('refresh-btn').addEventListener('click', () => {
-    currentSearchKeyword = '';
-    document.getElementById('search-student').value = '';
-    document.getElementById('search-result-container').style.display = 'none';
-    document.querySelector('#grades-table').closest('.table-container').style.display = 'block';
-    fetchGrades();
-  });
+  if (elements.refreshBtn) {
+    elements.refreshBtn.addEventListener('click', () => {
+      currentSearchKeyword = '';
+      if (elements.searchInput) elements.searchInput.value = '';
+      if (elements.searchResultContainer) elements.searchResultContainer.style.display = 'none';
+      if (elements.gradesTableContainer) elements.gradesTableContainer.style.display = 'block';
+      fetchGrades();
+    });
+  }
   
-  document.getElementById('search-btn').addEventListener('click', () => {
-    const keyword = document.getElementById('search-student').value.trim();
-    const keywordLower = keyword.toLowerCase();
-    currentSearchKeyword = keywordLower;
-    const statusEl = document.getElementById('view-status');
-    
-    // 데이터가 아직 로드되지 않았으면 로드 대기
-    if (!gradeRows || gradeRows.length === 0) {
-      statusEl.textContent = '데이터를 불러오는 중입니다. 잠시 후 다시 시도해주세요.';
-      statusEl.style.color = 'var(--text-muted)';
-      fetchGrades().then(() => {
-        // 데이터 로드 후 검색 다시 실행
-        if (keyword) {
+  if (elements.searchBtn) {
+    elements.searchBtn.addEventListener('click', () => {
+      const keyword = elements.searchInput ? elements.searchInput.value.trim() : '';
+      const keywordLower = keyword.toLowerCase();
+      currentSearchKeyword = keywordLower;
+      const statusEl = elements.viewStatus;
+      
+      // 데이터가 아직 로드되지 않았으면 로드 대기
+      if (!gradeRows || gradeRows.length === 0) {
+        if (statusEl) {
+          statusEl.textContent = '데이터를 불러오는 중입니다. 잠시 후 다시 시도해주세요.';
+          statusEl.style.color = 'var(--text-muted)';
+        }
+        fetchGrades().then(() => {
+          // 데이터 로드 후 검색 다시 실행
+          if (keyword) {
+            const filtered = filterGrades(keywordLower);
+            renderSearchResultTable(filtered);
+            if (elements.gradesTableContainer) elements.gradesTableContainer.style.display = 'none';
+            
+            if (statusEl) {
+              if (filtered.length === 0) {
+                statusEl.textContent = `"${keyword}"에 해당하는 학생 정보가 없습니다.`;
+                statusEl.style.color = 'var(--text-muted)';
+              } else {
+                statusEl.textContent = `검색 결과: ${filtered.length}건`;
+                statusEl.style.color = '';
+              }
+            }
+          }
+        });
+        return;
+      }
+      
+      if (keyword) {
+        try {
           const filtered = filterGrades(keywordLower);
           renderSearchResultTable(filtered);
-          document.querySelector('#grades-table').closest('.table-container').style.display = 'none';
+          // 기존 테이블 숨기기
+          if (elements.gradesTableContainer) elements.gradesTableContainer.style.display = 'none';
           
-          if (filtered.length === 0) {
-            statusEl.textContent = `"${keyword}"에 해당하는 학생 정보가 없습니다.`;
+          if (statusEl) {
+            if (filtered.length === 0) {
+              statusEl.textContent = `"${keyword}"에 해당하는 학생 정보가 없습니다.`;
+              statusEl.style.color = 'var(--text-muted)';
+            } else {
+              statusEl.textContent = `검색 결과: ${filtered.length}건`;
+              statusEl.style.color = '';
+            }
+          }
+        } catch (error) {
+          console.error('검색 중 오류 발생:', error);
+          if (statusEl) {
+            statusEl.textContent = `검색 중 오류가 발생했습니다: ${error.message}`;
             statusEl.style.color = 'var(--text-muted)';
-          } else {
-            statusEl.textContent = `검색 결과: ${filtered.length}건`;
-            statusEl.style.color = '';
           }
         }
-      });
-      return;
-    }
-    
-    if (keyword) {
-      try {
-        const filtered = filterGrades(keywordLower);
-        renderSearchResultTable(filtered);
-        // 기존 테이블 숨기기
-        document.querySelector('#grades-table').closest('.table-container').style.display = 'none';
-        
-        if (filtered.length === 0) {
-          statusEl.textContent = `"${keyword}"에 해당하는 학생 정보가 없습니다.`;
-          statusEl.style.color = 'var(--text-muted)';
-        } else {
-          statusEl.textContent = `검색 결과: ${filtered.length}건`;
+      } else {
+        // 검색어가 없으면 검색 결과 테이블 숨기고 기존 테이블 표시
+        if (elements.searchResultContainer) elements.searchResultContainer.style.display = 'none';
+        if (elements.gradesTableContainer) elements.gradesTableContainer.style.display = 'block';
+        renderTableBody(gradeRows);
+        if (statusEl) {
+          statusEl.textContent = `총 ${gradeRows.length}건`;
           statusEl.style.color = '';
         }
-      } catch (error) {
-        console.error('검색 중 오류 발생:', error);
-        statusEl.textContent = `검색 중 오류가 발생했습니다: ${error.message}`;
-        statusEl.style.color = 'var(--text-muted)';
       }
-    } else {
-      // 검색어가 없으면 검색 결과 테이블 숨기고 기존 테이블 표시
-      document.getElementById('search-result-container').style.display = 'none';
-      document.querySelector('#grades-table').closest('.table-container').style.display = 'block';
-      renderTableBody(gradeRows);
-      statusEl.textContent = `총 ${gradeRows.length}건`;
-      statusEl.style.color = '';
-    }
-  });
+    });
+  }
   
   // Enter 키로도 검색 가능하도록
-  document.getElementById('search-student').addEventListener('keypress', (event) => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      document.getElementById('search-btn').click();
-    }
-  });
+  if (elements.searchInput) {
+    elements.searchInput.addEventListener('keypress', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        if (elements.searchBtn) elements.searchBtn.click();
+      }
+    });
+  }
   
-  document.getElementById('select-all-btn').addEventListener('click', () => {
+  if (elements.selectAllBtn) {
+    elements.selectAllBtn.addEventListener('click', () => {
     selectedSubjects = new Set(SUBJECTS);
     updateCheckboxes();
     renderTableHeader();
@@ -157,12 +163,17 @@ document.addEventListener('DOMContentLoaded', () => {
   initEditForm();
   
   // 수정 폼 이벤트 리스너
-  document.getElementById('edit-grade-form').addEventListener('submit', handleEditSubmit);
-  document.getElementById('cancel-edit-btn').addEventListener('click', cancelEdit);
+  if (elements.editGradeForm) {
+    elements.editGradeForm.addEventListener('submit', handleEditSubmit);
+  }
+  if (elements.cancelEditBtn) {
+    elements.cancelEditBtn.addEventListener('click', cancelEdit);
+  }
 });
 
 function renderSubjectCheckboxes() {
   const container = document.getElementById('subject-checkboxes');
+  if (!container) return;
   container.innerHTML = SUBJECTS.map((subject, index) => {
     const isChecked = selectedSubjects.has(subject);
     const subjectName = getSubjectName(index + 1);
@@ -327,7 +338,7 @@ function renderSearchResultTable(rows) {
       
       const note = row.note || '-';
       const updated = row.updated_at
-        ? new Date(row.updated_at).toLocaleString('ko-KR')
+        ? formatDate(row.updated_at, true)
         : '-';
       return `
         <tr>
@@ -407,7 +418,7 @@ function renderTableBody(rows) {
       const nameDisplay = raw && raw.student_name ? raw.student_name : '-';
       const note = row.note || '-';
       const updated = row.updated_at
-        ? new Date(row.updated_at).toLocaleString('ko-KR')
+        ? formatDate(row.updated_at, true)
         : '-';
       return `
         <tr>
@@ -427,16 +438,24 @@ async function fetchGrades() {
   statusEl.textContent = '데이터를 불러오는 중...';
 
   try {
-    const { data, error } = await supabase
-      .from('student_grades')
-      .select('*')
-      .order('student_id', { ascending: true });
+    const { data, error } = await DB_UTILS.fetchAllGrades({ orderBy: 'student_id', ascending: true });
 
     if (error) throw error;
 
     // 원본 데이터 보관 (달성도 포함)
-    allGradeData = data;
-    gradeRows = data.map(row => normalizeGradeRow(row, currentLevel));
+    // Firestore 문서를 일반 객체로 변환
+    allGradeData = data.map(row => {
+      const obj = { ...row };
+      // Timestamp를 Date로 변환
+      if (obj.updated_at && obj.updated_at.toDate) {
+        obj.updated_at = obj.updated_at.toDate();
+      }
+      if (obj.created_at && obj.created_at.toDate) {
+        obj.created_at = obj.created_at.toDate();
+      }
+      return obj;
+    });
+    gradeRows = allGradeData.map(row => normalizeGradeRow(row, currentLevel));
     
     // 검색 키워드가 있으면 검색 결과 테이블 표시, 없으면 전체 테이블 표시
     if (currentSearchKeyword) {
@@ -639,10 +658,7 @@ async function handleEditSubmit(event) {
   statusEl.textContent = '수정 중...';
   
   try {
-    const { error } = await supabase
-      .from('student_grades')
-      .update(payload)
-      .eq('student_id', studentId);
+    const { error } = await DB_UTILS.updateGrade(studentId, payload);
     
     if (error) throw error;
     

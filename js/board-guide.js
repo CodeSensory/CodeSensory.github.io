@@ -228,7 +228,7 @@
 <h4>1. 다운로드 위치</h4>
 <p>엑셀 템플릿은 <strong>엑셀 템플릿 다운로드</strong> 전용 페이지에서 받을 수 있습니다.</p>
 <ul>
-  <li><strong>접속 방법</strong>: 브라우저 주소창에 사이트 주소 뒤에 <strong>download-templates.html</strong>을 입력하여 접속합니다. (https://codesensory.github.io/download-templates.html)</li>
+  <li><strong>접속 방법</strong>: 브라우저 주소창에 사이트 주소 뒤에 <strong>download-templates.html</strong>을 입력하여 접속합니다. (<a href="download-templates.html" class="board-guide-page-link">해당 페이지로 이동</a> )</li>
   <li>게시판 공지에 등록된 <strong>「핵심술기 성적 업로드용 엑셀 템플릿 다운로드」</strong>, <strong>「졸업 연도 업로드용 엑셀 템플릿 다운로드」</strong> 글의 다운로드 링크를 클릭해도 해당 페이지로 이동할 수 있습니다.</li>
   <li>해당 페이지에는 <strong>핵심술기 성적 업로드용.xlsx 다운로드</strong>, <strong>졸업 연도 업로드용.xlsx 다운로드</strong> 버튼이 있으며, 버튼을 클릭하면 해당 엑셀 파일이 즉시 다운로드됩니다.</li>
 </ul>

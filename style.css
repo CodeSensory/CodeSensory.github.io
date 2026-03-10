@@ -1074,6 +1074,51 @@ td.low-achievement-cell {
   background: var(--bg-tertiary);
 }
 
+/* input.html 엑셀 탭 – 엑셀 템플릿 다운로드 토글 */
+.excel-template-download-section {
+  margin-top: 24px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-primary);
+}
+
+.excel-template-summary {
+  padding: 14px 18px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  list-style: none;
+  user-select: none;
+  background: var(--bg-secondary);
+  color: var(--knu-blue);
+}
+
+.excel-template-summary::-webkit-details-marker {
+  display: none;
+}
+
+.excel-template-summary::before {
+  content: '▶';
+  display: inline-block;
+  margin-right: 10px;
+  font-size: 10px;
+  transition: transform 0.2s;
+}
+
+.excel-template-download-section[open] .excel-template-summary::before {
+  transform: rotate(90deg);
+}
+
+.excel-template-summary:hover {
+  background: var(--bg-tertiary);
+}
+
+.excel-template-download-content {
+  padding: 16px 18px 20px;
+  border-top: 1px solid var(--border-color);
+}
+
 .board-guide-page-link {
   margin-left: 8px;
   font-size: 13px;

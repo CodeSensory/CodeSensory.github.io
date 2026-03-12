@@ -155,9 +155,9 @@ function renderLevelTable(levelId, levelName, filteredData, totalCount) {
   
   const rows = Array.from(groupMap.values()).map((g) => {
     const total = g.high + g.mid + g.low;
-    const highP = total > 0 ? Math.round((g.high / total) * 100) : 0;
-    const midP = total > 0 ? Math.round((g.mid / total) * 100) : 0;
-    const lowP = total > 0 ? Math.round((g.low / total) * 100) : 0;
+    const highP = total > 0 ? ((g.high / total) * 100).toFixed(2) : '0.00';
+    const midP = total > 0 ? ((g.mid / total) * 100).toFixed(2) : '0.00';
+    const lowP = total > 0 ? ((g.low / total) * 100).toFixed(2) : '0.00';
     return {
       level: levelName,
       subjectName: g.subjectName,

@@ -1,53 +1,160 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
-
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>간호학과 성적 관리</title>
-  <link rel="icon" type="image/png" href="favicon.png" />
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <title>학기 선택</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .semester-selection-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 200px);
+      padding: 40px 20px;
+    }
+    
+    .semester-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      max-width: 600px;
+      width: 100%;
+      margin-top: 40px;
+    }
+    
+    .semester-card {
+      background: #ffffff;
+      border: 2px solid #e5ebf5;
+      border-radius: 12px;
+      padding: 32px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px rgba(16, 24, 40, 0.06);
+    }
+    
+    .semester-card:hover {
+      border-color: #1f5fbf;
+      box-shadow: 0 4px 12px rgba(31, 95, 191, 0.15);
+      transform: translateY(-2px);
+    }
+    
+    .semester-card:active {
+      transform: translateY(0);
+    }
+    
+    .semester-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1f3370;
+      margin: 0 0 8px 0;
+    }
+    
+    .semester-subtitle {
+      font-size: 16px;
+      color: #6b7280;
+      margin: 0;
+    }
+    
+    .selection-title {
+      font-size: 32px;
+      font-weight: 700;
+      color: #1f3370;
+      margin: 0 0 16px 0;
+      text-align: center;
+    }
+    
+    .selection-description {
+      font-size: 16px;
+      color: #6b7280;
+      text-align: center;
+      margin: 0 0 40px 0;
+    }
+  </style>
 </head>
-
 <body>
-  <p style="padding: 20px;">이동 중...</p>
-  <script src="config.js"></script>
-  <script src="js/db-utils.js"></script>
-  <script src="js/auth.js"></script>
+  <div class="superbar">
+    <div class="container superbar-inner">배치 설정 도구</div>
+  </div>
+  <header class="topbar">
+    <div class="topbar-inner container">
+      <a href="index.html" class="brand" style="text-decoration: none; color: inherit;">국립강릉원주대학교 간호학과(실습 배치 페이지)</a>
+      <nav class="topnav"></nav>
+    </div>
+  </header>
+
+  <div class="page-hero">
+    <div class="container">
+      <div class="breadcrumbs">
+        <span>학기 선택</span>
+      </div>
+      <h1 class="page-title">학기 선택</h1>
+    </div>
+  </div>
+
+  <main class="container">
+    <div class="semester-selection-container">
+      <h2 class="selection-title">학기를 선택해주세요</h2>
+      <p class="selection-description">배치 설정을 시작할 학기를 선택하세요</p>
+      
+      <div class="semester-grid">
+        <div class="semester-card" data-grade="3" data-semester="1">
+          <h3 class="semester-title">3학년 1학기</h3>
+          <p class="semester-subtitle">3학년 1학기 실습 배치</p>
+        </div>
+        
+        <div class="semester-card" data-grade="3" data-semester="2">
+          <h3 class="semester-title">3학년 2학기</h3>
+          <p class="semester-subtitle">3학년 2학기 실습 배치</p>
+        </div>
+        
+        <div class="semester-card" data-grade="4" data-semester="1">
+          <h3 class="semester-title">4학년 1학기</h3>
+          <p class="semester-subtitle">4학년 1학기 실습 배치</p>
+        </div>
+        
+        <div class="semester-card" data-grade="4" data-semester="2">
+          <h3 class="semester-title">4학년 2학기</h3>
+          <p class="semester-subtitle">4학년 2학기 실습 배치</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p class="footer-text">문의: codesensory@gmail.com</p>
+    </div>
+  </footer>
+
   <script>
-    // 스크립트가 모두 로드된 후 리다이렉트
     (function() {
-      // 현재 페이지가 index.html인지 확인
-      var currentPage = window.location.pathname.split('/').pop() || 'index.html';
-      if (currentPage !== 'index.html' && currentPage !== '') {
-        return; // index.html이 아니면 리다이렉트하지 않음
-      }
+      const cards = document.querySelectorAll('.semester-card');
       
-      function redirect() {
-        // Auth 객체가 로드되었는지 확인
-        if (typeof Auth !== 'undefined' && typeof Auth.getSession === 'function') {
-          var session = Auth.getSession();
-          if (session) {
-            window.location.href = 'view.html';
-          } else {
-            window.location.href = 'login.html';
+      cards.forEach(card => {
+        card.addEventListener('click', function() {
+          const grade = this.getAttribute('data-grade');
+          const semester = this.getAttribute('data-semester');
+          
+          // 선택한 학기 정보를 localStorage에 저장
+          try {
+            const semesterInfo = {
+              grade: parseInt(grade),
+              semester: parseInt(semester),
+              label: `${grade}학년 ${semester}학기`
+            };
+            localStorage.setItem('selectedSemester', JSON.stringify(semesterInfo));
+          } catch (e) {
+            console.error('localStorage 저장 실패:', e);
           }
-        } else {
-          // Auth 객체가 아직 로드되지 않았으면 재시도
-          setTimeout(redirect, 50);
-        }
-      }
-      
-      // DOM이 로드된 후 실행
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', redirect);
-      } else {
-        redirect();
-      }
+          
+          // 설정 페이지로 이동
+          window.location.href = 'config.html';
+        });
+      });
     })();
   </script>
 </body>
-
 </html>

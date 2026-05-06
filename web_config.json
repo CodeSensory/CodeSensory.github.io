@@ -1,0 +1,215 @@
+{
+  "numA": 42,
+  "numB": 42,
+  "numPeriods": 6,
+  "assignments": [
+    {
+      "period": 1,
+      "class": "A",
+      "semester": "1"
+    },
+    {
+      "period": 2,
+      "class": "A",
+      "semester": "1"
+    },
+    {
+      "period": 3,
+      "class": "A",
+      "semester": "1"
+    },
+    {
+      "period": 4,
+      "class": "B",
+      "semester": "1"
+    },
+    {
+      "period": 5,
+      "class": "B",
+      "semester": "1"
+    },
+    {
+      "period": 6,
+      "class": "B",
+      "semester": "1"
+    }
+  ],
+  "oneA": {
+    "max": [
+      {
+        "hospital": "서울부민",
+        "department": "5W",
+        "deptType": "external",
+        "values": [
+          5,
+          5,
+          5,
+          5,
+          5,
+          5
+        ],
+        "allowDuplicate": false
+      },
+      {
+        "hospital": "삼성서울",
+        "department": "15동",
+        "deptType": "both",
+        "values": [
+          0,
+          0,
+          0,
+          2,
+          2,
+          0
+        ],
+        "allowDuplicate": false
+      },
+      {
+        "hospital": "보라매",
+        "department": "82W",
+        "deptType": "internal",
+        "values": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
+        "allowDuplicate": false
+      },
+      {
+        "hospital": "보라매",
+        "department": "61W",
+        "deptType": "external",
+        "values": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
+        "allowDuplicate": false
+      },
+      {
+        "hospital": "원주세브란스기독",
+        "department": "101W",
+        "deptType": "both",
+        "values": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ],
+        "allowDuplicate": false
+      },
+      {
+        "hospital": "원주세브란스기독",
+        "department": "52W",
+        "deptType": "internal",
+        "values": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ],
+        "allowDuplicate": false
+      },
+      {
+        "hospital": "원주세브란스기독",
+        "department": "61W",
+        "deptType": "both",
+        "values": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ],
+        "allowDuplicate": false
+      },
+      {
+        "hospital": "원주세브란스기독",
+        "department": "82W",
+        "deptType": "both",
+        "values": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ],
+        "allowDuplicate": false
+      },
+      {
+        "hospital": "중앙보훈병원",
+        "department": "81W",
+        "deptType": "external",
+        "values": [
+          3,
+          2,
+          3,
+          2,
+          3,
+          2
+        ],
+        "allowDuplicate": false
+      },
+      {
+        "hospital": "중앙보훈병원",
+        "department": "100W",
+        "deptType": "internal",
+        "values": [
+          2,
+          3,
+          2,
+          3,
+          2,
+          3
+        ],
+        "allowDuplicate": false
+      },
+      {
+        "hospital": "중앙보훈병원",
+        "department": "111W",
+        "deptType": "internal",
+        "values": [
+          3,
+          2,
+          3,
+          2,
+          3,
+          2
+        ],
+        "allowDuplicate": false
+      },
+      {
+        "hospital": "중앙보훈병원",
+        "department": "121W",
+        "deptType": "internal",
+        "values": [
+          2,
+          3,
+          2,
+          3,
+          2,
+          3
+        ],
+        "allowDuplicate": false
+      }
+    ],
+    "min": []
+  },
+  "selectedSemester": {
+    "grade": 3,
+    "semester": 1,
+    "label": "3학년 1학기"
+  }
+}

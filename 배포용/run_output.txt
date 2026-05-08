@@ -1,7 +1,0 @@
-Traceback (most recent call last):
-  File "batchalgorithm.py", line 239, in <module>
-  File "pulp\pulp.py", line 2092, in solve
-  File "pulp\apis\coin_api.py", line 144, in actualSolve
-  File "pulp\apis\coin_api.py", line 153, in solve_CBC
-pulp.apis.core.PulpSolverError: Pulp: cannot execute C:\Users\jamco\Desktop\nursing\배포용\_internal\pulp\apis\../solverdir/cbc/win/i64/cbc.exe cwd: C:\Users\jamco\Desktop\nursing\배포용
-[PYI-6208:ERROR] Failed to execute script 'batchalgorithm' due to unhandled exception!

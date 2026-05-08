@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>학기 선택</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .semester-selection-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 200px);
+      padding: 40px 20px;
+    }
+    
+    .semester-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      max-width: 600px;
+      width: 100%;
+      margin-top: 40px;
+    }
+    
+    .semester-card {
+      background: #ffffff;
+      border: 2px solid #e5ebf5;
+      border-radius: 12px;
+      padding: 32px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px rgba(16, 24, 40, 0.06);
+    }
+    
+    .semester-card:hover {
+      border-color: #1f5fbf;
+      box-shadow: 0 4px 12px rgba(31, 95, 191, 0.15);
+      transform: translateY(-2px);
+    }
+    
+    .semester-card:active {
+      transform: translateY(0);
+    }
+    
+    .semester-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1f3370;
+      margin: 0 0 8px 0;
+    }
+    
+    .semester-subtitle {
+      font-size: 16px;
+      color: #6b7280;
+      margin: 0;
+    }
+    
+    .selection-title {
+      font-size: 32px;
+      font-weight: 700;
+      color: #1f3370;
+      margin: 0 0 16px 0;
+      text-align: center;
+    }
+    
+    .selection-description {
+      font-size: 16px;
+      color: #6b7280;
+      text-align: center;
+      margin: 0 0 40px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="superbar">
+    <div class="container superbar-inner">배치 설정 도구</div>
+  </div>
+  <header class="topbar">
+    <div class="topbar-inner container">
+      <a href="index.html" class="brand" style="text-decoration: none; color: inherit;">국립강릉원주대학교 간호학과(실습 배치 페이지)</a>
+      <nav class="topnav"></nav>
+    </div>
+  </header>
+
+  <div class="page-hero">
+    <div class="container">
+      <div class="breadcrumbs">
+        <span>학기 선택</span>
+      </div>
+      <h1 class="page-title">학기 선택</h1>
+    </div>
+  </div>
+
+  <main class="container">
+    <div class="semester-selection-container">
+      <h2 class="selection-title">학기를 선택해주세요</h2>
+      <p class="selection-description">배치 설정을 시작할 학기를 선택하세요</p>
+      
+      <div class="semester-grid">
+        <div class="semester-card" data-grade="3" data-semester="1">
+          <h3 class="semester-title">3학년 1학기</h3>
+          <p class="semester-subtitle">3학년 1학기 실습 배치</p>
+        </div>
+        
+        <div class="semester-card" data-grade="3" data-semester="2">
+          <h3 class="semester-title">3학년 2학기</h3>
+          <p class="semester-subtitle">3학년 2학기 실습 배치</p>
+        </div>
+        
+        <div class="semester-card" data-grade="4" data-semester="1">
+          <h3 class="semester-title">4학년 1학기</h3>
+          <p class="semester-subtitle">4학년 1학기 실습 배치</p>
+        </div>
+        
+        <div class="semester-card" data-grade="4" data-semester="2">
+          <h3 class="semester-title">4학년 2학기</h3>
+          <p class="semester-subtitle">4학년 2학기 실습 배치</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p class="footer-text">문의: codesensory@gmail.com</p>
+    </div>
+  </footer>
+
+  <script>
+    (function() {
+      const cards = document.querySelectorAll('.semester-card');
+      
+      cards.forEach(card => {
+        card.addEventListener('click', function() {
+          const grade = this.getAttribute('data-grade');
+          const semester = this.getAttribute('data-semester');
+          
+          // 선택한 학기 정보를 localStorage에 저장
+          try {
+            const semesterInfo = {
+              grade: parseInt(grade),
+              semester: parseInt(semester),
+              label: `${grade}학년 ${semester}학기`
+            };
+            localStorage.setItem('selectedSemester', JSON.stringify(semesterInfo));
+          } catch (e) {
+            console.error('localStorage 저장 실패:', e);
+          }
+          
+          // 설정 페이지로 이동
+          window.location.href = 'config.html';
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

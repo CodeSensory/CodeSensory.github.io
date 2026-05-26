@@ -4,75 +4,71 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>1-A 요약</title>
-  <link rel="stylesheet" href="styles.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="superbar">
-    <div class="container superbar-inner">배치 설정 도구</div>
-  </div>
-  <header class="topbar">
-    <div class="topbar-inner container">
-      <a href="index.html" class="brand" style="text-decoration: none; color: inherit;">국립강릉원주대학교 간호학과(실습 배치 페이지)</a>
-    </div>
-  </header>
+  <div class="page-shell">
+    <header class="site-header">
+      <a href="index.html" class="logo-link">
+        <div class="logo">
+          <img src="https://www.kangwon.ac.kr/assets/ko/images/logos/logo-color.webp" alt="강원대학교" />
+          <span class="label-status campus" style="color:white;background:#F1B337" aria-label="원주">원주</span>
+          <strong>간호학과 실습 배치</strong>
+        </div>
+      </a>
+    </header>
 
-  <div class="page-hero">
-    <div class="container">
-      <div class="breadcrumbs">
-        <a href="index.html">학기 선택</a>
-        <span class="sep">&gt;</span>
-        <a href="config.html">배치 입력</a>
-        <span class="sep">&gt;</span>
-        <a href="page-1a.html">1-A 최대 인원</a>
-        <span class="sep">&gt;</span>
-        <span>요약</span>
+    <section class="hero">
+      <div class="hero-content">
+        <nav class="breadcrumbs" aria-label="경로">
+          <a href="index.html">학기 선택</a>
+          <span class="sep">&gt;</span>
+          <a href="config.html">배치 입력</a>
+          <span class="sep">&gt;</span>
+          <a href="page-1a.html">1-A 최대 인원</a>
+          <span class="sep">&gt;</span>
+          <span>요약</span>
+        </nav>
+        <h1 class="page-main-title">입력 내용 요약</h1>
+        <p class="page-description">입력한 배치 설정을 확인하고 파일로 저장합니다.</p>
       </div>
-      <h1 class="page-title">입력 내용 요약</h1>
-    </div>
-  </div>
+    </section>
 
-  <main class="container page-content">
-    <div class="panel">
-      <div class="panel-header">
-        <h2 class="panel-title">기본 설정</h2>
-      </div>
-      <div class="panel-body">
+    <main class="content-grid">
+      <section class="panel">
+        <h2>기본 설정</h2>
         <div class="table-wrap">
           <table class="table">
             <tbody id="basic-tbody"></tbody>
           </table>
         </div>
-      </div>
-    </div>
+      </section>
 
-    <div class="panel">
-      <div class="panel-header">
-        <h2 class="panel-title">최대/최소 인원</h2>
-      </div>
-      <div class="panel-body">
+      <section class="panel">
+        <h2>최대 인원</h2>
         <div class="table-wrap">
           <table class="table">
             <thead id="maxmin-head"></thead>
             <tbody id="maxmin-body"></tbody>
           </table>
         </div>
+      </section>
+
+      <div class="actions panel-actions">
+        <a href="page-1a.html" class="btn">이전</a>
+        <button type="button" id="export-config" class="btn primary">web_config.json 저장</button>
+        <button type="button" id="export-image" class="btn primary">최대 인원 표 이미지 저장</button>
       </div>
-    </div>
+    </main>
 
-    <div class="actions">
-      <a href="page-1a.html" class="btn">이전</a>
-      <button id="export-config" class="btn primary">web_config.json 저장</button>
-      <button id="export-image" class="btn primary">최대/최소 인원 표 이미지 저장</button>
-    </div>
-  </main>
+    <footer class="site-footer">
+      <p>문의: codesensory@gmail.com</p>
+    </footer>
+  </div>
 
-  <footer class="site-footer">
-    <div class="container">
-      <p class="footer-text">문의: codesensory@gmail.com</p>
-    </div>
-  </footer>
-
-  <script src="page-1a-summary.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="js/batch-common.js"></script>
+  <script src="js/page-1a-shared.js"></script>
+  <script src="js/page-1a-summary.js"></script>
 </body>
 </html>

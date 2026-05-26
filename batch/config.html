@@ -4,50 +4,52 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>배치 입력 페이지</title>
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="superbar">
-    <div class="container superbar-inner">배치 설정 도구</div>
-  </div>
-  <header class="topbar">
-    <div class="topbar-inner container">
-      <a href="index.html" class="brand" style="text-decoration: none; color: inherit;">국립강릉원주대학교 간호학과(실습 배치 페이지)</a>
-      <nav class="topnav"></nav>
-    </div>
-  </header>
+  <div class="page-shell">
+    <header class="site-header">
+      <a href="index.html" class="logo-link">
+        <div class="logo">
+          <img src="https://www.kangwon.ac.kr/assets/ko/images/logos/logo-color.webp" alt="강원대학교" />
+          <span class="label-status campus" style="color:white;background:#F1B337" aria-label="원주">원주</span>
+          <strong>간호학과 실습 배치</strong>
+        </div>
+      </a>
+    </header>
 
-  <div class="page-hero">
-    <div class="container">
-      <div class="breadcrumbs">
-        <a href="index.html">학기 선택</a>
-        <span class="sep">&gt;</span>
-        <span>배치 입력</span>
+    <section class="hero">
+      <div class="hero-content">
+        <nav class="breadcrumbs" aria-label="경로">
+          <a href="index.html">학기 선택</a>
+          <span class="sep">&gt;</span>
+          <span>배치 입력</span>
+        </nav>
+        <h1 class="page-main-title">배치 파라미터 입력</h1>
+        <p class="page-description">학생 수와 기간별 반·학기 정보를 입력합니다.</p>
       </div>
-      <h1 class="page-title">배치 파라미터 입력</h1>
-    </div>
-  </div>
+    </section>
 
-  <main class="container page-content">
-    <div class="panel">
-      <div class="panel-header">
-        <h2 class="panel-title">입력 폼</h2>
-        <div id="selected-semester-info" class="muted" style="font-size: 14px;"></div>
-      </div>
-      <div class="panel-body">
+    <main class="content-grid">
+      <section class="panel">
+        <div class="panel-toolbar">
+          <h2>입력 폼</h2>
+          <span id="selected-semester-info" class="semester-badge"></span>
+        </div>
+
         <form id="config-form" class="form-grid">
           <div class="field">
-            <label for="num-a">A반 학생 수</label>
+            <label class="field-label" for="num-a">A반 학생 수</label>
             <input id="num-a" name="numA" type="number" min="0" placeholder="예: 40" required />
           </div>
 
           <div class="field">
-            <label for="num-b">B반 학생 수</label>
+            <label class="field-label" for="num-b">B반 학생 수</label>
             <input id="num-b" name="numB" type="number" min="0" placeholder="예: 40" required />
           </div>
 
           <div class="field">
-            <label for="num-periods">기간 수</label>
+            <label class="field-label" for="num-periods">기간 수</label>
             <input id="num-periods" name="numPeriods" type="number" min="1" placeholder="예: 7" required />
           </div>
 
@@ -55,8 +57,8 @@
             <button type="button" id="build-periods" class="btn">기간별 입력 생성</button>
           </div>
 
-          <section id="period-assignments" class="card">
-            <p class="muted">"기간별 입력 생성" 버튼을 눌러 기간별 반/학기 선택을 만들어주세요.</p>
+          <section id="period-assignments" class="panel-inner full-width field">
+            <p id="period-assignments-hint" class="muted">"기간별 입력 생성" 버튼을 눌러 기간별 반/학기 선택을 만들어주세요.</p>
           </section>
 
           <div class="actions">
@@ -64,17 +66,15 @@
             <a href="page-1a.html" id="go-1a" class="btn primary">다음 (1-A 설정)</a>
           </div>
         </form>
-      </div>
-    </div>
-  </main>
+      </section>
+    </main>
 
-  <footer class="site-footer">
-    <div class="container">
-      <p class="footer-text">문의: codesensory@gmail.com</p>
-    </div>
-  </footer>
+    <footer class="site-footer">
+      <p>문의: codesensory@gmail.com</p>
+    </footer>
+  </div>
 
-  <script src="script.js"></script>
+  <script src="js/batch-common.js"></script>
+  <script src="js/config.js"></script>
 </body>
 </html>
-

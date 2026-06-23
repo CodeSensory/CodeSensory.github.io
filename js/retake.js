@@ -42,14 +42,6 @@
     if (section) section.style.display = 'block';
     if (label) label.textContent = rawData.student_name ? `${studentId}(${rawData.student_name})` : studentId;
     LEVELS.forEach(level => renderLevelTable(level, rawData));
-
-    document.querySelectorAll('.retake-row').forEach((row) => {
-      row.addEventListener('click', function () {
-        const level = this.getAttribute('data-level');
-        const subjectIndex = parseInt(this.getAttribute('data-subject-index'), 10);
-        openModal(level, subjectIndex);
-      });
-    });
   }
 
   function hideResultSection() {
@@ -60,6 +52,20 @@
 
   function openModal(level, subjectIndex) {
     if (!currentStudentData) return;
+
+    const modal = document.getElementById('retake-modal');
+    const levelInput = document.getElementById('retake-modal-level');
+    const indexInput = document.getElementById('retake-modal-subject-index');
+    const scoreInput = document.getElementById('retake-modal-score');
+    const achievementInput = document.getElementById('retake-modal-achievement');
+    const statusEl = document.getElementById('retake-modal-status');
+
+    if (!modal || !levelInput || !indexInput || !scoreInput || !achievementInput) {
+      console.error('재시험 입력 모달 요소를 찾을 수 없습니다.');
+      setStatus('입력 창을 열 수 없습니다. Ctrl+F5로 새로고침 후 다시 시도해 주세요.', true);
+      return;
+    }
+
     const subjectKey = getSubjectKey(level, subjectIndex);
     const achievementKey = getAchievementKey(level, subjectIndex);
     const scoreVal = currentStudentData[subjectKey];
@@ -67,14 +73,12 @@
     const parsed = parseScoreForRetake(scoreVal);
     const currentAchievement = getDisplayAchievement(achievementVal);
 
-    document.getElementById('retake-modal-level').value = level;
-    document.getElementById('retake-modal-subject-index').value = subjectIndex;
-    document.getElementById('retake-modal-year').value = parsed.year || '';
-    document.getElementById('retake-modal-subject-name').value = parsed.subjectName || getSubjectName(subjectIndex + 1);
-    document.getElementById('retake-modal-score').value = parsed.score || '';
-    document.getElementById('retake-modal-achievement').value = currentAchievement === '-' ? '' : currentAchievement;
-    document.getElementById('retake-modal-status').textContent = '';
-    document.getElementById('retake-modal').style.display = 'flex';
+    levelInput.value = level;
+    indexInput.value = subjectIndex;
+    scoreInput.value = parsed.score || '';
+    achievementInput.value = currentAchievement === '-' ? '' : currentAchievement;
+    if (statusEl) statusEl.textContent = '';
+    modal.style.display = 'flex';
   }
 
   function closeModal() {
@@ -173,8 +177,6 @@
     }
     const level = document.getElementById('retake-modal-level').value;
     const subjectIndex = parseInt(document.getElementById('retake-modal-subject-index').value, 10);
-    const year = document.getElementById('retake-modal-year').value.trim();
-    const subjectName = document.getElementById('retake-modal-subject-name').value.trim();
     const score = document.getElementById('retake-modal-score').value.trim();
     const achievement = document.getElementById('retake-modal-achievement').value.trim();
     const statusEl = document.getElementById('retake-modal-status');
@@ -186,24 +188,19 @@
     const achievementKey = getAchievementKey(level, subjectIndex);
     const previousScoreValue = currentStudentData[subjectKey];
     const previousAchievementValue = currentStudentData[achievementKey];
+    const parsed = parseScoreForRetake(previousScoreValue);
+    const year = parsed.year || '-';
+    const subjectName = parsed.subjectName || getSubjectName(subjectIndex + 1);
 
     let newScoreValue = previousScoreValue;
     let newAchievementValue = previousAchievementValue;
 
     if (score !== '') {
-      newScoreValue = formatRetakeScore(score, year || '-', subjectName || '-', previousScoreValue);
+      newScoreValue = formatRetakeScore(score, year, subjectName, previousScoreValue);
     }
     if (achievement !== '') {
       newAchievementValue = formatRetakeAchievement(achievement, previousAchievementValue);
     }
-
-    const payload = {
-      ...currentStudentData,
-      [subjectKey]: newScoreValue,
-      [achievementKey]: newAchievementValue,
-    };
-    delete payload.id;
-    delete payload.updated_at;
 
     statusEl.textContent = '저장 중...';
     try {
@@ -215,13 +212,6 @@
       currentStudentData[subjectKey] = newScoreValue;
       currentStudentData[achievementKey] = newAchievementValue;
       renderLevelTable(level, currentStudentData);
-      document.querySelectorAll('#retake-tbody-' + level + ' .retake-row').forEach((row) => {
-        row.addEventListener('click', function () {
-          const l = this.getAttribute('data-level');
-          const idx = parseInt(this.getAttribute('data-subject-index'), 10);
-          openModal(l, idx);
-        });
-      });
       statusEl.textContent = '저장되었습니다.';
       setTimeout(() => {
         closeModal();
@@ -235,10 +225,26 @@
   document.addEventListener('DOMContentLoaded', function () {
     const searchBtn = document.getElementById('retake-search-btn');
     const searchInput = document.getElementById('retake-search-student');
+    const resultSection = document.getElementById('retake-result-section');
+    const modalCancel = document.getElementById('retake-modal-cancel');
+    const editForm = document.getElementById('retake-edit-form');
+
     if (searchBtn) searchBtn.addEventListener('click', searchStudent);
     if (searchInput) searchInput.addEventListener('keypress', function (e) { if (e.key === 'Enter') searchStudent(); });
-    document.getElementById('retake-modal-cancel').addEventListener('click', closeModal);
-    document.getElementById('retake-edit-form').addEventListener('submit', saveRetakeEdit);
+
+    if (resultSection) {
+      resultSection.addEventListener('click', function (e) {
+        const row = e.target.closest('.retake-row');
+        if (!row) return;
+        const level = row.getAttribute('data-level');
+        const subjectIndex = parseInt(row.getAttribute('data-subject-index'), 10);
+        if (!level || Number.isNaN(subjectIndex)) return;
+        openModal(level, subjectIndex);
+      });
+    }
+
+    if (modalCancel) modalCancel.addEventListener('click', closeModal);
+    if (editForm) editForm.addEventListener('submit', saveRetakeEdit);
     var selectModal = document.getElementById('retake-select-student-modal');
     var selectCancel = document.getElementById('retake-select-student-cancel');
     if (selectCancel) selectCancel.addEventListener('click', hideSelectStudentModal);

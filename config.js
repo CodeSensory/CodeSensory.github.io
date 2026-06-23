@@ -292,34 +292,73 @@ function getDisplayAchievement(value) {
 }
 
 /**
- * 재시험 형식에서 이전 점수 추출
- * @param {string|number|null} value - 점수 값
- * @returns {string} 이전 점수
+ * 재시험 점수 괄호 안 내용을 쉼표로 분리 (중첩 괄호 보존)
+ * @param {string} inner - 괄호 안 문자열
+ * @returns {string[]} 분리된 파트 배열
  */
-function getPreviousScore(value) {
-  if (!value || !isRetakeScore(value)) return '';
-  const s = String(value).trim();
-  const innerMatch = s.match(/^\d+(?:\.\d+)?\((.*)\)$/s);
-  if (!innerMatch) return '';
-  const parts = innerMatch[1].split(/\s*,\s*/, 3);
-  if (parts.length < 3) return '';
-  const prevPart = parts[2].trim();
-  const numMatch = prevPart.match(/^\d+(?:\.\d+)?/);
-  return numMatch ? numMatch[0] : '';
+function splitRetakeInnerParts(inner) {
+  const parts = [];
+  let current = '';
+  let depth = 0;
+  for (let i = 0; i < inner.length; i++) {
+    const ch = inner[i];
+    if (ch === '(') depth++;
+    else if (ch === ')') depth--;
+    else if (ch === ',' && depth === 0) {
+      parts.push(current.trim());
+      current = '';
+      continue;
+    }
+    current += ch;
+  }
+  if (current) parts.push(current.trim());
+  return parts;
 }
 
 /**
- * 재시험 형식에서 이전 달성도 추출
+ * 재시험 형식에서 최초(가장 안쪽) 점수 추출
+ * @param {string|number|null} value - 점수 값
+ * @returns {string} 최초 점수
+ */
+function getPreviousScore(value) {
+  if (!value) return '';
+  const s = String(value).trim();
+  if (!isRetakeScore(s)) {
+    const score = extractScore(s);
+    return score !== '-' ? score : '';
+  }
+  const innerMatch = s.match(/^\d+(?:\.\d+)?\((.*)\)$/s);
+  if (!innerMatch) return '';
+  const parts = splitRetakeInnerParts(innerMatch[1]);
+  if (parts.length < 3) return '';
+  const prevPart = parts[2];
+  if (/^\d+(?:\.\d+)?\s*\(/.test(prevPart)) {
+    return getPreviousScore(prevPart);
+  }
+  const score = extractScore(prevPart);
+  return score !== '-' ? score : '';
+}
+
+/**
+ * 재시험 형식에서 최초(가장 안쪽) 달성도 추출
  * @param {string|null} value - 달성도 값
- * @returns {string} 이전 달성도
+ * @returns {string} 최초 달성도
  */
 function getPreviousAchievement(value) {
   if (value === null || value === undefined || value === '') return '';
   const s = String(value).trim();
-  const i = s.indexOf('(');
-  if (i < 0) return '';
-  const inner = s.slice(i + 1).replace(/\)+$/, '').trim();
-  return inner || '';
+  if (!isRetakeAchievement(s)) return s;
+  let current = s;
+  while (current.includes('(')) {
+    const i = current.indexOf('(');
+    const inner = current.slice(i + 1).replace(/\)+$/, '').trim();
+    if (inner.includes('(')) {
+      current = inner;
+    } else {
+      return inner;
+    }
+  }
+  return current;
 }
 
 /**

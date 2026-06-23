@@ -12,7 +12,7 @@
 const ADMIN_EMAIL = 'codesensory@gmail.com';
 
 // EmailJS 설정 (EmailJS 대시보드에서 확인 가능)
-const EMAILJS_SERVICE_ID = 'service_s1978lf'; // EmailJS Service ID
+const EMAILJS_SERVICE_ID = 'service_idm2m5a'; // EmailJS Service ID
 const EMAILJS_TEMPLATE_ID = 'template_6aq3mmu'; // EmailJS Template ID (관리자 알림용)
 const EMAILJS_PUBLIC_KEY = '9Vyz_8-WAwyK1A-2_'; // EmailJS Public Key
 

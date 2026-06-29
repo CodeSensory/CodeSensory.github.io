@@ -87,6 +87,8 @@ function renderCriteriaTable() {
     const num = parseInt(key.replace('subject_', ''));
     const subjectName = getSubjectName(num);
     const criteria = criteriaData[key] || { high: '', mid: '' };
+    const highBorder = criteria.high ? '' : 'border: 2px solid #dc3545;';
+    const midBorder = criteria.mid ? '' : 'border: 2px solid #dc3545;';
     
     return `
       <tr>
@@ -100,7 +102,9 @@ function renderCriteriaTable() {
             id="criteria-high-${key}" 
             value="${criteria.high || ''}" 
             placeholder="예: 80"
-            style="width: 100px; padding: 4px;"
+            required
+            oninput="updateCriteriaBorder(this)"
+            style="width: 100px; padding: 4px; ${highBorder}"
           />
         </td>
         <td>
@@ -112,7 +116,9 @@ function renderCriteriaTable() {
             id="criteria-mid-${key}" 
             value="${criteria.mid || ''}" 
             placeholder="예: 60"
-            style="width: 100px; padding: 4px;"
+            required
+            oninput="updateCriteriaBorder(this)"
+            style="width: 100px; padding: 4px; ${midBorder}"
           />
         </td>
         <td>
@@ -129,6 +135,11 @@ function renderCriteriaTable() {
     `;
   }).join('');
 }
+
+// 기준점 입력칸 빨간 테두리 토글 (빈 칸일 때만 표시)
+window.updateCriteriaBorder = function(input) {
+  input.style.border = input.value.trim() !== '' ? '' : '2px solid #dc3545';
+};
 
 // 단일 과목 기준점 적용
 window.applySingleCriteria = function(subjectKey) {
@@ -192,6 +203,8 @@ function applyCriteriaAndCalculate() {
       allValid = false;
       const num = parseInt(key.replace('subject_', ''));
       missingSubjects.push(getSubjectName(num));
+      if (highInput && isNaN(high)) highInput.style.border = '2px solid #dc3545';
+      if (midInput && isNaN(mid)) midInput.style.border = '2px solid #dc3545';
       return;
     }
     
@@ -209,7 +222,7 @@ function applyCriteriaAndCalculate() {
     const statusEl = document.getElementById('criteria-status');
     statusEl.textContent = `다음 과목의 기준점을 입력해주세요: ${missingSubjects.join(', ')}`;
     statusEl.style.color = 'var(--text-muted)';
-    return;
+    return false;
   }
   
   // 모든 과목에 대해 달성도 계산
@@ -222,6 +235,7 @@ function applyCriteriaAndCalculate() {
   const statusEl = document.getElementById('criteria-status');
   statusEl.textContent = `모든 기준점 적용 완료! 총 ${sortedSubjectKeys.length}개 과목의 달성도가 계산되었습니다.`;
   statusEl.style.color = '';
+  return true;
 }
 
 // 셀 값에서 숫자 점수만 추출 (예: "85(2024, 기본간호)" -> 85)
@@ -692,41 +706,8 @@ async function handleSave() {
     return;
   }
   
-  // 달성도가 계산되었는지 확인
-  const allSubjectKeys = new Set();
-  previewData.forEach(row => {
-    SUBJECTS.forEach((key, index) => {
-      const levelSubjectKey = getSubjectKey(savedLevel, index);
-      const hasScore = row[levelSubjectKey] !== undefined && row[levelSubjectKey] !== null && row[levelSubjectKey] !== '';
-      if (hasScore) {
-        allSubjectKeys.add(key);
-      }
-    });
-  });
-  
-  let hasUncalculatedAchievement = false;
-  allSubjectKeys.forEach(key => {
-    const subjectIndex = SUBJECTS.indexOf(key);
-    const levelAchievementKey = getAchievementKey(savedLevel, subjectIndex);
-    const hasAchievement = previewData.some(row => {
-      const achievement = row[levelAchievementKey];
-      return achievement && (achievement === '상' || achievement === '중' || achievement === '하');
-    });
-    if (!hasAchievement) {
-      hasUncalculatedAchievement = true;
-    }
-  });
-  
-  if (hasUncalculatedAchievement) {
-    if (!confirm('일부 과목의 달성도가 계산되지 않았습니다. 기준점을 적용하고 달성도를 계산하시겠습니까?')) {
-      return;
-    }
-    applyCriteriaAndCalculate();
-    setTimeout(() => {
-      showFinalPreview();
-    }, 500);
-    return;
-  }
+  const ok = applyCriteriaAndCalculate();
+  if (!ok) return;
   
   showFinalPreview();
 }

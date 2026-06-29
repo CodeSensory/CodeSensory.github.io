@@ -211,6 +211,18 @@ function extractScore(value) {
 }
 
 /**
+ * 화면 표시용 점수 반올림 (최대 소수점 2자리)
+ * @param {string|number|null} scoreStr - 점수 문자열
+ * @returns {string} 반올림된 점수 문자열
+ */
+function roundScoreDisplay(scoreStr) {
+  if (scoreStr === null || scoreStr === undefined || scoreStr === '' || scoreStr === '-') return scoreStr;
+  const n = Number(scoreStr);
+  if (!isFinite(n)) return scoreStr;
+  return String(Math.round(n * 100) / 100);
+}
+
+/**
  * 점수 표시용 (재시험 페이지 등에서 사용)
  * @param {string|number|null} value - 점수 값
  * @returns {string} 표시용 점수 문자열
@@ -368,7 +380,7 @@ function getPreviousAchievement(value) {
  * @returns {string} 포맷된 문자열
  */
 function formatScoreCell(rawScore, rawAchievement) {
-  const currScore = extractScore(rawScore);
+  const currScore = roundScoreDisplay(extractScore(rawScore));
   const currAch = getDisplayAchievement(rawAchievement);
   const hasRetakeScore = isRetakeScore(rawScore);
   const hasRetakeAch = isRetakeAchievement(rawAchievement);
@@ -378,7 +390,7 @@ function formatScoreCell(rawScore, rawAchievement) {
   if (currStr === '-') return '-';
   if (!isRetake) return currStr;
 
-  const prevScore = getPreviousScore(rawScore);
+  const prevScore = roundScoreDisplay(getPreviousScore(rawScore));
   const prevAch = getPreviousAchievement(rawAchievement);
   const prevStr = prevScore && prevAch ? `${prevScore}(${prevAch})` : (prevScore || prevAch || '');
   if (prevStr && currStr) {

@@ -358,9 +358,9 @@ function renderSearchResultTable(rows) {
           const l1Raw = rawData[l1Key];
           const l2Raw = rawData[l2Key];
           const l3Raw = rawData[l3Key];
-          const l1Html = scoreCellHtml(l1Raw, extractScore(l1Raw));
-          const l2Html = scoreCellHtml(l2Raw, extractScore(l2Raw));
-          const l3Html = scoreCellHtml(l3Raw, extractScore(l3Raw));
+          const l1Html = scoreCellHtml(l1Raw, roundScoreDisplay(extractScore(l1Raw)));
+          const l2Html = scoreCellHtml(l2Raw, roundScoreDisplay(extractScore(l2Raw)));
+          const l3Html = scoreCellHtml(l3Raw, roundScoreDisplay(extractScore(l3Raw)));
           return `<td>${l1Html}</td><td>${l2Html}</td><td>${l3Html}</td>`;
         })
         .join('');
@@ -454,7 +454,7 @@ function renderTableBody(rows) {
           const levelSubjectKey = getSubjectKey(currentLevel, idx);
           const raw = allGradeData.find(r => r.student_id === row.student_id);
           const rawValue = raw ? raw[levelSubjectKey] : null;
-          const displayValue = raw ? extractScore(rawValue) : '-';
+          const displayValue = raw ? roundScoreDisplay(extractScore(rawValue)) : '-';
           const cellHtml = scoreCellHtml(rawValue, displayValue);
           return `<td>${cellHtml}</td>`;
         })

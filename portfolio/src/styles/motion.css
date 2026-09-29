@@ -1,0 +1,212 @@
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes carousel-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rule-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes nav-stagger {
+  from {
+    opacity: 0;
+    transform: translateY(1.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-page-enter {
+  animation: page-enter 680ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+.animate-carousel-in {
+  animation: carousel-in 480ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+.animate-rule-draw {
+  height: 2px;
+  transform-origin: left;
+  transform: scaleX(0);
+  animation: rule-draw 900ms cubic-bezier(0.32, 0.72, 0, 1) 180ms forwards;
+}
+
+@keyframes register-in {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes card-rise {
+  from {
+    opacity: 0;
+    transform: translateY(1.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.axis-rise {
+  animation: card-rise 480ms cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+.contact-rise {
+  animation: card-rise 560ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  animation-delay: var(--reveal-delay, 0ms);
+}
+
+.contact-register {
+  animation: register-in 640ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  animation-delay: var(--reveal-delay, 0ms);
+}
+
+.research-axis-card:nth-child(1) .axis-rise {
+  animation-delay: 720ms;
+}
+
+.research-axis-card:nth-child(2) .axis-rise {
+  animation-delay: 980ms;
+}
+
+.research-axis-card:nth-child(3) .axis-rise {
+  animation-delay: 1240ms;
+}
+
+.research-axis-card:nth-child(4) .axis-rise {
+  animation-delay: 1500ms;
+}
+
+@keyframes hero-pop {
+  0% {
+    opacity: 0.45;
+    filter: blur(16px);
+    transform: translate3d(3rem, 3rem, 0) scale(0.62);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.hero-pop {
+  opacity: 0;
+  transform-origin: right bottom;
+  animation: hero-pop 1700ms cubic-bezier(0.32, 0.72, 0, 1) 2100ms forwards;
+}
+
+.nav-stagger-item {
+  animation: nav-stagger 620ms cubic-bezier(0.32, 0.72, 0, 1) backwards;
+}
+
+.swiss-blueprint {
+  background-image:
+    linear-gradient(to right, rgba(5, 5, 5, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(5, 5, 5, 0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.swiss-noise {
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 128px 128px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-reveal]:not(.is-shown) {
+    opacity: 0;
+    transform: translateY(1.25rem);
+  }
+
+  [data-reveal].is-shown {
+    animation: card-rise 560ms cubic-bezier(0.32, 0.72, 0, 1) both;
+    animation-delay: var(--reveal-delay, 0ms);
+  }
+
+  [data-reveal='register']:not(.is-shown) {
+    opacity: 1;
+    transform: none;
+  }
+
+  [data-reveal='register']:not(.is-shown) > .register-sheet {
+    clip-path: inset(0 100% 0 0);
+  }
+
+  [data-reveal='register'].is-shown > .register-sheet {
+    animation: register-in 640ms cubic-bezier(0.32, 0.72, 0, 1) both;
+    animation-delay: var(--reveal-delay, 0ms);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-page-enter,
+  .animate-carousel-in,
+  .nav-stagger-item,
+  .animate-rule-draw,
+  .axis-rise,
+  .contact-rise,
+  .contact-register,
+  .hero-pop {
+    animation: none;
+  }
+
+  .axis-rise {
+    opacity: 1;
+    transform: none;
+  }
+
+  .animate-rule-draw {
+    transform: scaleX(1);
+  }
+
+  .contact-rise {
+    opacity: 1;
+    transform: none;
+  }
+
+  .contact-register {
+    clip-path: none;
+  }
+
+  .hero-pop {
+    opacity: 1;
+    filter: none;
+    transform: none;
+  }
+
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    clip-path: none;
+  }
+}

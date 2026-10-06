@@ -52,7 +52,7 @@ GitHub
 
 ### certify
 
-I certify that this portfolio is accurate and complete. — September 28, 2026.
+I certify that this portfolio is accurate and complete. — October 6, 2026.
 
 ### certifyMark
 
@@ -124,16 +124,18 @@ CNN이 이미지에서 실제로 무엇을 근거로 판단하는지 연구합�
 
 #### 진행중인 연구
 
-의료 영상과 웨어러블 시계열의\\n
-CNN shortcut
+Graph-based explanations of fundus images,
+passed to an LLM for report-style text
 
 #### 논문 심사 중
 
-KSMI 2026 추계학술대회
+- KSMI 2026 추계학술대회\\n
+- CMPB
 
-#### 다음 단계
+#### 다음 연구 주제
 
-Computers in Biology and Medicine 투고 준비
+Reinforcement Learning + Computer Vision \\n
+(Domain: Medical)
 
 ### researchSectionTitle
 
@@ -245,7 +247,7 @@ Best Paper
 
 #### planned
 
-예정
+Pilot 연구 진행 중
 
 ### abstractLabel
 
@@ -269,7 +271,7 @@ Jaemin Hwang, Meen Hye Lee
 
 #### venue
 
-Computers in Biology and Medicine (투고 대상, 미투고)
+Computer Methods and Programs in Biomedicine (CMPB)
 
 #### year
 
@@ -277,7 +279,7 @@ Computers in Biology and Medicine (투고 대상, 미투고)
 
 #### status
 
-draft
+submitted
 
 #### featured
 
@@ -294,7 +296,7 @@ self-supervised learning, digital pathology, label efficiency, external validati
 #### summary
 
 대장 H&E 패치 분류는 전문가 라벨링 비용이 크고, 기관과 염색 방식에 따른 분포 차이도 큽니다.\\n이 연구는 새로운 방법을 내세우기보다, 라벨이 적을 때 self-supervised 설계 선택이 외부 코호트 성능을 어떻게 바꾸는지 통제된 조건에서 비교합니다.\\nNCT-CRC-HE-100K-NONORM으로 ResNet-18을 SimCLR 방식으로 사전학습하고, 7개 설정 × 라벨 비율 10·25·100% × 시드 3개, 총 63회 실험의 CRC-VAL-HE-7K 9-class 정확도를 비교했습니다.\\n스케줄 증강 설정은 모든 라벨 비율에서 scratch 학습보다 좋았고, 10%와 25%에서는 일반 SSL보다도 평균 정확도가 높았습니다(10% curriculum 0.562 vs. 0.321).\\n다만 curriculum과 colorless의 차이는 작아 색 고유의 이득은 뒷받침되지 않았고, CRC-VAL 정확도는 curriculum보다 평가 파이프라인과 초기화에 더 민감했습니다.\\n\\n
-Computers in Biology and Medicine 투고를 준비하고 있습니다.\\n한국어 초고를 마쳤고, 영문 원고를 다듬고 있습니다.
+Computer Methods and Programs in Biomedicine(CMPB)에 투고해 심사를 받고 있습니다.
 
 ### ksmi-2026-wearable-colormap
 
@@ -320,7 +322,7 @@ submitted
 
 #### featured
 
-1
+3
 
 #### abstract
 
@@ -382,7 +384,7 @@ Jaemin Hwang
 
 #### venue
 
-계획
+Pilot 연구 진행 중
 
 #### year
 
@@ -394,16 +396,16 @@ planned
 
 #### featured
 
-3
+1
 
 #### abstract
 
-Planned study: extract graph-structured lesion explanations from fundus images, pass them to an LLM for report-style text, and evaluate faithfulness to the graph rather than generic text metrics alone.
+Pilot study in progress: extract graph-structured lesion explanations from fundus images, pass them to an LLM for report-style text, and evaluate faithfulness to the graph rather than generic text metrics alone.
 
 #### summary
 
 LLM이 만든 판독 문장은 자연스럽게 읽혀도, 영상에서 실제로 확인된 근거와 어긋날 수 있습니다.\\n이 연구는 안저(fundus) 영상에서 병변 정보를 그래프 구조의 설명으로 먼저 추출할 계획입니다.\\n추출한 그래프를 LLM에 넘겨 판독 소견 형식의 문장을 생성합니다.\\n평가는 BLEU 같은 일반 텍스트 지표에만 기대지 않고, 생성된 문장이 그래프 내용과 얼마나 일치하는지(faithfulness)를 중심으로 봅니다.\\n데이터는 공개 fundus 벤치마크를 사용할 예정입니다.\\n\\n
-아직 계획 단계의 연구로, 투고 전입니다.
+Pilot 연구를 진행 중이며, 투고 전입니다.
 
 ### pub-earthquake-kips
 
@@ -561,7 +563,7 @@ ICAEIC 2022(2022년 7월) 논문집에 실렸고, Best Paper를 받았습니다.
 
 ### lead
 
-연구 외에 강원대학교 간호학과의 학사 관리 도구 개발을 진행하였습니다.
+진행한 프로젝트를 확인하실 수 있습니다.
 
 ### previousLabel
 
@@ -688,6 +690,53 @@ html2canvas
 병원별, 기간별 최대 인원과 합계를 표로 모은 다음 JSON 파일과 PNG 이미지로 받습니다.\\n
 이미 만든 JSON은 다시 올리면 표에서 고친 뒤 다시 받을 수 있습니다.
 
+### poison-mushroom-web
+
+#### title
+
+독버섯 판단 분류기
+
+#### period
+
+2025.03 – 2025.06
+
+#### role
+
+아이디어 제안, 모델과 웹 구현
+
+#### summary
+
+사진을 올리면 식용 버섯과 독버섯 40종 안에서 종을 가려 주는 웹 서비스입니다.\\n
+배고픈 GPT 팀 과제에서 데이터 구성, 모델 학습, 웹 페이지 구현을 담당하였습니다.
+
+#### stack
+
+PyTorch
+ONNX
+HTML
+CSS
+JavaScript
+
+#### highlights
+
+##### 40종 데이터와 증강
+
+농촌진흥청 자료를 기준으로 식용 20종, 독버섯 20종을 골랐습니다.\\n
+종마다 원본 사진을 모은 뒤, 같은 사진에서 방향과 색을 따로 바꾸어 학습 이미지를 늘렸습니다.\\n
+회전은 갓의 형태는 두고 보는 방향만 바꿉니다. 색 변환은 형태는 두고 RGB만 바꿉니다.\\n
+종을 가르는 단서가 색으로만 모이지 않도록, 형태가 남는 회전과 색이 바뀌는 변환을 함께 학습에 넣었습니다.
+
+##### 비교 뒤 ResNet-50
+
+AlexNet, VGG, GoogLeNet, ResNet-50을 같은 조건에서 학습해 비교했습니다.\\n
+수렴이 빠르고 학습 정확도가 높았던 ResNet-50을 서비스에 넣었습니다.
+
+##### 브라우저에서 바로 판단
+
+학습이 끝난 가중치는 ONNX로 저장하고, 페이지와 같은 경로에서 GET으로 불러옵니다.\\n
+올린 사진은 모델 입력 크기로 맞춘 뒤 추론합니다. 상위 3개 확률을 보여주고, \\n
+1위가 독버섯이면 증상과 심각도를, 식용이면 생김새와 조리 정보를 함께 적습니다.
+
 ## about
 
 ### sectionTitle
@@ -767,7 +816,7 @@ How I research
 
 #### 2020.01 ~ 2021.07
 
-육군 제1군단
+군복무 (육군 제1군단)
 
 #### 2019.03 ~ 2019.12
 

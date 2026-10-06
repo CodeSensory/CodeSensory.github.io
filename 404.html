@@ -4,19 +4,19 @@
     <meta charset="utf-8" />
     <title>CodeSensory Lab</title>
     <script>
-      var pathSegmentsToKeep = 1
+      var PATH_SEGMENTS_TO_KEEP = 0
       var locationRef = window.location
       locationRef.replace(
         locationRef.protocol +
           '//' +
           locationRef.hostname +
           (locationRef.port ? ':' + locationRef.port : '') +
-          locationRef.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') +
+          locationRef.pathname.split('/').slice(0, 1 + PATH_SEGMENTS_TO_KEEP).join('/') +
           '/?/' +
           locationRef.pathname
             .slice(1)
             .split('/')
-            .slice(pathSegmentsToKeep)
+            .slice(PATH_SEGMENTS_TO_KEEP)
             .join('/')
             .replace(/&/g, '~and~') +
           (locationRef.search ? '&' + locationRef.search.slice(1).replace(/&/g, '~and~') : '') +

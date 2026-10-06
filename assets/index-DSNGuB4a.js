@@ -595,7 +595,7 @@ ICAEIC 2022(2022년 7월) 논문집에 실렸고, Best Paper를 받았습니다.
 
 #### links
 
-사이트 https://codesensory.github.io/login.html
+사이트 https://kangwongw.github.io/login.html
 
 #### summary
 
@@ -653,7 +653,7 @@ xlsx는 SheetJS로 읽습니다. 저장 전에 미리보기를 거칩니다.\\n
 
 #### links
 
-사이트 https://codesensory.github.io/batch/index.html
+사이트 https://kangwongw.github.io/batch/index.html
 
 #### summary
 
